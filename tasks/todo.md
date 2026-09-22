@@ -60,7 +60,7 @@ Each phase is a feature branch (`pnpm worktree:new feat/<name>`) merged into `de
 
 ## Phase 6 — Dashboard cleanup (day 6)
 
-- [ ] Remove placeholder routes (analytics/reports, assets/_, billing/_, integrations/\*, developers/docs, studio/index, studio/editor, team/roles) and the fake notifications / hardcoded sidebar user
+- [ ] Remove placeholder routes (`analytics/reports`, `assets/*`, `billing/*`, `integrations/*`, `developers/docs`, `studio/index`, `studio/editor`, `team/roles`) and the fake notifications / hardcoded sidebar user
 - [ ] Merge the duplicate `VideoCard`s (`features/folders` and `features/videos`); wire card actions (rename, move, copy link, delete)
 - [ ] Overview page with checklist and real counts
 - [ ] Team members + invites; organization settings; drop the onboarding billing step
