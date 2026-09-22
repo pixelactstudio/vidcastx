@@ -1,0 +1,85 @@
+---
+title: Architecture overview
+description: The components of VidcastX and how they talk to each other.
+---
+
+## The pieces
+
+| Component            | Runtime         | Responsibility                                                                                                                  |
+| -------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `apps/app`           | Node (Vite SSR) | Dashboard UI. Holds no business logic: reads and writes go to the API.                                                          |
+| `apps/api`           | Bun             | Auth, organizations, video and folder CRUD, presigned upload URLs, the dispatcher cron, and the internal endpoints for workers. |
+| `workers/transcoder` | Node + FFmpeg   | Pulls transcode jobs from Redis, runs FFmpeg, writes HLS output to storage, and reports status to the API.                      |
+| PostgreSQL           | Docker          | System of record: users, organizations, videos, assets, folders. Accessed through Drizzle.                                      |
+| Redis                | Docker          | BullMQ job queue, Better Auth secondary storage, and the dispatcher lock.                                                       |
+| S3 / MinIO           | Docker          | Raw uploads and every processed output (playlists, segments, posters, previews).                                                |
+
+## How they connect
+
+```text
+                 ┌──────────────────────────────┐
+  Browser ──────►│ apps/app   TanStack Start    │ :4000
+     │           └──────────────┬───────────────┘
+     │                          │ HTTP, Eden Treaty (typed)
+     │                          ▼
+     │           ┌──────────────────────────────┐        ┌──────────────┐
+     │           │ apps/api   Elysia on Bun     │◄──────►│ PostgreSQL   │
+     │           │  /api/v1/*        (users)    │        └──────────────┘
+     │           │  /api/internal/*  (workers)  │        ┌──────────────┐
+     │           │  dispatcher cron (every 5 s) │◄──────►│ Redis        │
+     │           └───────┬──────────────▲───────┘        │ BullMQ queue │
+     │                   │ presigned    │ status         └──────▲───────┘
+     │                   │ part URLs    │ callbacks             │ video-transcode
+     │                   ▼              │ (M2M JWT)             │ jobs
+     │  PUT parts  ┌────────────┐       │            ┌──────────┴─────────┐
+     └────────────►│ S3 / MinIO │◄──────┼────────────┤ workers/transcoder │
+                   └────────────┘ download source,   │ Node + FFmpeg CLI  │
+                                  upload HLS output  └────────────────────┘
+```
+
+Three properties of this layout:
+
+- **Upload bytes never pass through the API.** The API signs one URL per upload part, and the browser `PUT`s each part directly to S3. The API only coordinates the upload.
+- **The worker never touches the database.** It gets everything it needs from the job payload. It writes results back through the API's internal endpoints, so the API stays the only writer to PostgreSQL.
+- **The queue is fed by a scheduler, not by request handlers.** Finishing an upload only marks the video `queued`. A cron in the API decides when each video enters BullMQ. See [Video pipeline](/docs/architecture/video-pipeline).
+
+## API surface
+
+Every route is mounted under `/api` and described by OpenAPI at `/openapi`.
+
+- **`/api/v1/*`** is the user-facing API. It is guarded by the Better Auth session and scoped to the session's active organization. Requests without an active organization get `400`.
+- **`/api/internal/*`** is for workers only. It never sees a Better Auth session.
+- **Better Auth** is mounted on the same server, at its default `/api/auth` base path.
+
+Request and response bodies are TypeBox schemas. Many are derived from the Drizzle tables with `drizzle-typebox`. Errors share one shape, `{ "error": string }`.
+
+## Authentication
+
+**Users** sign in through Better Auth with email/password, GitHub or Discord. Sessions are stored in PostgreSQL and cached in Redis. The organization plugin adds organizations, members, invitations and roles, and every video and folder belongs to an organization.
+
+**Workers** use an OAuth2-style client-credentials exchange implemented in `apps/api/src/modules/internal`:
+
+1. The worker `POST`s `{ clientId, clientSecret }` to `/api/internal/token`. The API checks the secret against `TRANSCODER_SECRET` and signs a JWT with `JWT_SECRET`. The JWT carries `role: "internal-worker"` and expires after 1 hour.
+2. The worker sends that JWT as a bearer token on `/api/internal/*` calls. `MachineClient` in `packages/m2m` caches the token and refreshes it 60 seconds before it expires.
+
+The token endpoint is rate limited to 10 requests per minute per client IP. The limiter is in-memory, so each API process counts separately.
+
+## Data model
+
+The two tables that matter for media are in `packages/database/src/schema/video-schema.ts`:
+
+- **`video`**: one row per upload. Holds `org_id`, `uploader_id`, `folder_id`, `title`, `visibility`, `status`, `error_reason`, `duration`, `resolution`, soft-delete `deleted_at`, and `master_access_url`. That last column holds the storage key of the raw upload, not a URL.
+- **`asset`**: one row per produced file. `type` is one of `hls_playlist`, `thumbnail`, `preview_gif`, `audio_track`, `subtitle_track`, `storyboard` or `source_file`, and `storage_key` points into the bucket. The transcoder currently produces the first three.
+
+Application tables use 21-character nanoids with a type prefix, generated by `generateId()` in the database package: `vid_…` for videos, `ast_…` for assets, `fld_…` for folders. Users and organizations come from Better Auth and use its IDs.
+
+## Storage layout
+
+All objects live in one bucket (`S3_BUCKET_NAME`), namespaced by organization:
+
+| Key                                | Written by | Contents                                                |
+| ---------------------------------- | ---------- | ------------------------------------------------------- |
+| `raw/{orgId}/{videoId}.{ext}`      | Browser    | The original upload (multipart).                        |
+| `processed/{orgId}/{videoId}/*`    | Transcoder | `master.m3u8`, per-rendition playlists, `.ts` segments. |
+| `thumbnails/{orgId}/{videoId}.jpg` | Transcoder | Poster frame.                                           |
+| `previews/{orgId}/{videoId}.webm`  | Transcoder | Six-second muted hover preview.                         |

@@ -1,0 +1,114 @@
+---
+title: Project structure
+description: What each app, worker and package in the monorepo does.
+---
+
+VidcastX is a Turborepo monorepo with pnpm workspaces. The workspace globs are `apps/*`, `packages/*`, `tooling/*` and `workers/*`.
+
+```text
+apps/
+  api/            Elysia REST API on Bun (port 4001)
+  app/            TanStack Start dashboard (port 4000)
+  docs/           This site: Fumadocs on TanStack Start (port 4002)
+  studio/         Drizzle Studio launcher and database scripts
+workers/
+  transcoder/     BullMQ worker that runs FFmpeg to produce HLS
+packages/
+  auth/           Better Auth configuration
+  database/       Drizzle schemas, migrations and client
+  m2m/            Worker-to-API client-credentials client
+  queue/          BullMQ queues and job payload types
+  redis/          Shared ioredis client
+  storage/        S3 helpers (presigned URLs, multipart, upload/download)
+  ui/             shadcn components on Base UI, Tailwind theme
+  analytics/      Analytics adapters (not used by any app yet)
+  seo/            Metadata helpers (not used by any app yet)
+tooling/
+  eslint-config/  Shared ESLint 9 flat configs
+  prettier/       Shared Prettier config
+  typescript-config/  Shared tsconfig bases
+turbo/generators/ turbo gen template for new packages
+```
+
+## Apps
+
+### `apps/api`
+
+The REST API, an Elysia server on Bun. It runs as a single process listening on `PORT`. The plugins are OpenTelemetry, OpenAPI (served at `/openapi`), request logging, server timing and CORS, plus one central `onError` handler. The API also mounts the Better Auth handler, and it runs the [dispatcher cron](/docs/architecture/video-pipeline#5-dispatch-fairly) inside the same process.
+
+All routes live under `/api`:
+
+| Route group                       | Purpose                                                                                 |
+| --------------------------------- | --------------------------------------------------------------------------------------- |
+| `/api/v1/videos`                  | List, create, read, update, soft-delete and restore videos; multipart upload endpoints. |
+| `/api/v1/folders`                 | Folder CRUD and browsing.                                                               |
+| `/api/v1/users`                   | Stub routes that return placeholder data.                                               |
+| `/api/internal/token`             | Issues machine-to-machine JWTs to workers (rate limited).                               |
+| `/api/internal/videos/:id/status` | Receives status and asset callbacks from the transcoder.                                |
+
+The router exports `type App`, which the dashboard consumes through Eden Treaty for end-to-end typed calls.
+
+Scripts: `dev` (Bun with `--watch`), `build` (`bun build --compile` to a single binary at `dist/index`), `start`, `test` (`bun test`).
+
+### `apps/app`
+
+The creator dashboard, built on TanStack Start with React 19 and Tailwind v4. It calls the API through a typed Eden Treaty client (`src/lib/api.ts`) and uploads files with Uppy's S3 multipart plugin.
+
+- Feature folders in `src/features`: `auth`, `dashboard`, `folders`, `onboarding`, `videos`
+- Main routes: `/auth/login`, `/auth/signup`, `/onboarding`, `/dashboard/*` (videos, projects/folders, and several sections that are still header-only placeholders: analytics, assets, billing, developers, integrations, studio, team)
+
+### `apps/docs`
+
+This documentation site. It uses Fumadocs on TanStack Start and serves search from a local Orama index. It has no external services.
+
+### `apps/studio`
+
+This app has no source code. Its `dev` script launches Drizzle Studio, and it hosts the `db:migrate`, `db:generate`, `db:push` and `db:studio` scripts. Each of those runs `drizzle-kit` inside `packages/database`. The root `pnpm db:*` scripts reach them through Turbo.
+
+## Worker
+
+### `workers/transcoder`
+
+A Node.js BullMQ worker that consumes the `video-transcode` queue with a concurrency of 1. For each job it:
+
+1. Downloads the source from S3.
+2. Runs `ffprobe` and one `ffmpeg` process to produce an HLS ladder.
+3. Uploads the output.
+4. Generates a poster JPEG and a WebM hover preview.
+5. Reports each state change to the API.
+
+| File                      | Role                                                                           |
+| ------------------------- | ------------------------------------------------------------------------------ |
+| `src/index.ts`            | Worker entry point and the job handler.                                        |
+| `src/api.ts`              | `notifyApiStatus()`: authenticated `PATCH` to the API's internal status route. |
+| `src/env.ts`              | Validated env: `TRANSCODER_ID`, `TRANSCODER_SECRET`, `API_URL`, `HW_ENCODER`.  |
+| `src/ffmpeg/probe.ts`     | Reads height, frame rate, duration and audio presence with `ffprobe`.          |
+| `src/ffmpeg/variants.ts`  | Builds the resolution/frame-rate ladder.                                       |
+| `src/ffmpeg/transcode.ts` | Builds and runs the HLS `ffmpeg` command, parses progress.                     |
+| `src/ffmpeg/poster.ts`    | Extracts a poster frame.                                                       |
+| `src/ffmpeg/preview.ts`   | Encodes the hover preview clip.                                                |
+
+`ROADMAP.md` in the worker directory is a wishlist (chunked transcoding, per-title ladders). None of it is implemented yet. [Transcoding](/docs/architecture/transcoding) walks through the worker in detail.
+
+## Packages
+
+Packages ship TypeScript source; there is no build step. Each has `lint`, `format` and `check-types` scripts.
+
+| Package     | What it provides                                                                                                                                                                                                                     | Used by                                 |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------- |
+| `auth`      | `initAuth()`: Better Auth with the Drizzle adapter, Redis as secondary storage, and the organization plugin. Supports GitHub, Discord and email/password. Users and organizations are soft-deleted. Emails are logged, not sent.     | API                                     |
+| `database`  | Drizzle client, schemas and migrations, with pgvector enabled. Code currently uses only the `auth`, `video` and `folder` schemas. The `ai`, `analytics`, `billing`, `distribution`, `live` and `transcript` schemas are tables only. | API                                     |
+| `m2m`       | `MachineClient`: fetches a JWT from `/api/internal/token` with a client ID and secret, caches it until 60 s before expiry, and sends it as a bearer token.                                                                           | Transcoder                              |
+| `queue`     | BullMQ queues with 3 attempts and exponential backoff. `QUEUES` names five queues. Only `video-transcode` is used.                                                                                                                   | API, transcoder                         |
+| `redis`     | A singleton ioredis client (`maxRetriesPerRequest: null`, as BullMQ requires).                                                                                                                                                       | API, auth, queue, worker                |
+| `storage`   | AWS SDK v3 helpers: presigned GET/PUT URLs, multipart init/sign/complete/abort/list, stream download and upload, delete file or prefix.                                                                                              | API, transcoder                         |
+| `ui`        | About 55 shadcn components built on `@base-ui/react`, plus the Tailwind v4 theme tokens in `globals.css`.                                                                                                                            | Dashboard                               |
+| `analytics` | PostHog, Vercel and Google Analytics wrappers written for Next.js.                                                                                                                                                                   | Nothing yet                             |
+| `seo`       | `Metadata` and JSON-LD helpers.                                                                                                                                                                                                      | Declared by the dashboard, not imported |
+
+## Tooling
+
+- `tooling/eslint-config`: flat configs named `base`, `library`, `react-internal`, `tanstack-app` and `elysia-api`. The `tanstack-app` config stops frontend code from importing backend packages.
+- `tooling/prettier`: 120-column Prettier config with import sorting and Tailwind class sorting.
+- `tooling/typescript-config`: strict tsconfig bases named `base`, `library`, `react-library`, `app-bundler` and `api-bun`.
+- `turbo/generators`: a `turbo gen` template that scaffolds `packages/<name>` with its `package.json`, tsconfig and ESLint config.
