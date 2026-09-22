@@ -11,7 +11,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "lint": "eslint",
-    "format": "prettier --check . --ignore-path ../../.gitignore",
+    "format": "prettier --check . --ignore-path ../../.gitignore --ignore-path .prettierignore",
     "check-types": "tsc --noEmit",
     "clean": "git clean -xdf .cache .next .dist .turbo node_modules",
     "with-env": "dotenv -e ../../.env --"
