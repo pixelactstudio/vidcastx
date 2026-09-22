@@ -38,13 +38,13 @@ The REST API, an Elysia server on Bun. It runs as a single process listening on 
 
 All routes live under `/api`:
 
-| Route group                       | Purpose                                                                                 |
-| --------------------------------- | --------------------------------------------------------------------------------------- |
+| Route group                       | Purpose                                                                                                   |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------- |
 | `/api/v1/videos`                  | List, create, read and update videos; multipart upload endpoints (delete and restore are stubs until V1). |
-| `/api/v1/folders`                 | Folder CRUD and browsing.                                                               |
-| `/api/v1/users`                   | Stub routes that return placeholder data.                                               |
-| `/api/internal/token`             | Issues machine-to-machine JWTs to workers (rate limited).                               |
-| `/api/internal/videos/:id/status` | Receives status and asset callbacks from the transcoder.                                |
+| `/api/v1/folders`                 | Folder CRUD and browsing.                                                                                 |
+| `/api/v1/users`                   | Stub routes that return placeholder data.                                                                 |
+| `/api/internal/token`             | Issues machine-to-machine JWTs to workers (rate limited).                                                 |
+| `/api/internal/videos/:id/status` | Receives status and asset callbacks from the transcoder.                                                  |
 
 The router exports `type App`, which the dashboard consumes through Eden Treaty for end-to-end typed calls.
 
