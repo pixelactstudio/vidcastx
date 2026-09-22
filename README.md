@@ -2,9 +2,9 @@
 
 **In development · Platform experiment**
 
-VidcastX is a source-available experiment for organization-scoped video uploads, processing, and playback. The repository contains a working application shell, API, local infrastructure, and an FFmpeg-based HLS worker, but it is not a production-ready video platform and the full upload-to-playback path has not yet been verified as one repeatable deployment.
+VidcastX is an open-source, self-hostable video platform: organization-scoped uploads, HLS transcoding, and playback. The repository contains a working application shell, API, local infrastructure, and an FFmpeg-based HLS worker, but it is not a production-ready video platform and the full upload-to-playback path has not yet been verified as one repeatable deployment.
 
-The code is publicly visible for evaluation. It is proprietary, not open source; see [License](#license).
+It is MIT-licensed; see [License](#license).
 
 ![VidcastX login screen](docs/assets/login.png)
 
@@ -128,7 +128,7 @@ These checks validate source-level behavior. They do not replace an end-to-end r
 
 ## Contribution and branch model
 
-This is an internal proprietary project. Changes are reviewed through pull requests into `dev`; `main` is the release branch. Follow the repository conventions in [CLAUDE.md](CLAUDE.md) and `.claude/rules/`.
+Contributions are welcome. Changes are reviewed through pull requests into `dev`; `main` is the release branch. Follow the repository conventions in [CLAUDE.md](CLAUDE.md) and `.claude/rules/`.
 
 ## Security
 
@@ -136,6 +136,4 @@ Do not report vulnerabilities in public issues. Use [GitHub private vulnerabilit
 
 ## License
 
-Copyright © Pixelact Studio. All rights reserved.
-
-VidcastX is proprietary source-available software. Public repository visibility does not grant permission to use, copy, modify, distribute, sublicense, or sell the code. See [LICENSE](LICENSE) for the controlling terms.
+[MIT](LICENSE) © 2024-2026 Pixelact Studio.
