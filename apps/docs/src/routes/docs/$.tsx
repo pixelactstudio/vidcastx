@@ -34,7 +34,6 @@ const loadPage = createServerFn({ method: "GET" })
 export const Route = createFileRoute("/docs/$")({
   loader: async ({ params }) => {
     const data = await loadPage({ data: params._splat ?? "" });
-    // eslint-disable-next-line @typescript-eslint/only-throw-error -- TanStack Router's notFound() throws a special object
     if (!data) throw notFound();
 
     await docs.getPage(data.path)?.preload();
