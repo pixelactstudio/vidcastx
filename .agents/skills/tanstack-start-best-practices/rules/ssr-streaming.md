@@ -10,43 +10,43 @@ Streaming SSR sends HTML chunks to the browser as they're ready, rather than wai
 
 ```tsx
 // Blocking SSR - waits for everything
-export const Route = createFileRoute("/dashboard")({
+export const Route = createFileRoute('/dashboard')({
   loader: async ({ context: { queryClient } }) => {
     // All of these must complete before ANY HTML is sent
     await Promise.all([
-      queryClient.ensureQueryData(userQueries.profile()), // 200ms
-      queryClient.ensureQueryData(dashboardQueries.stats()), // 500ms
-      queryClient.ensureQueryData(activityQueries.recent()), // 300ms
-      queryClient.ensureQueryData(notificationQueries.all()), // 400ms
-    ]);
+      queryClient.ensureQueryData(userQueries.profile()),      // 200ms
+      queryClient.ensureQueryData(dashboardQueries.stats()),   // 500ms
+      queryClient.ensureQueryData(activityQueries.recent()),   // 300ms
+      queryClient.ensureQueryData(notificationQueries.all()),  // 400ms
+    ])
     // TTFB: 500ms (slowest query)
   },
-});
+})
 ```
 
 ## Good Example: Stream Non-Critical Content
 
 ```tsx
 // routes/dashboard.tsx
-export const Route = createFileRoute("/dashboard")({
+export const Route = createFileRoute('/dashboard')({
   loader: async ({ context: { queryClient } }) => {
     // Only await critical above-the-fold data
-    await queryClient.ensureQueryData(userQueries.profile());
+    await queryClient.ensureQueryData(userQueries.profile())
 
     // Start fetching but don't await
-    queryClient.prefetchQuery(dashboardQueries.stats());
-    queryClient.prefetchQuery(activityQueries.recent());
-    queryClient.prefetchQuery(notificationQueries.all());
+    queryClient.prefetchQuery(dashboardQueries.stats())
+    queryClient.prefetchQuery(activityQueries.recent())
+    queryClient.prefetchQuery(notificationQueries.all())
 
     // HTML starts streaming immediately after profile loads
     // TTFB: 200ms
   },
   component: DashboardPage,
-});
+})
 
 function DashboardPage() {
   // Critical data - ready immediately (from loader)
-  const { data: user } = useSuspenseQuery(userQueries.profile());
+  const { data: user } = useSuspenseQuery(userQueries.profile())
 
   return (
     <div>
@@ -65,13 +65,13 @@ function DashboardPage() {
         <NotificationsList />
       </Suspense>
     </div>
-  );
+  )
 }
 
 // Each section loads independently and streams when ready
 function DashboardStats() {
-  const { data: stats } = useSuspenseQuery(dashboardQueries.stats());
-  return <StatsDisplay stats={stats} />;
+  const { data: stats } = useSuspenseQuery(dashboardQueries.stats())
+  return <StatsDisplay stats={stats} />
 }
 ```
 
@@ -79,7 +79,7 @@ function DashboardStats() {
 
 ```tsx
 function DashboardPage() {
-  const { data: user } = useSuspenseQuery(userQueries.profile());
+  const { data: user } = useSuspenseQuery(userQueries.profile())
 
   return (
     <div>
@@ -97,41 +97,41 @@ function DashboardPage() {
         </Suspense>
       </div>
     </div>
-  );
+  )
 }
 
 function LeftColumn() {
   // These load together (same Suspense boundary)
-  const { data: stats } = useSuspenseQuery(dashboardQueries.stats());
-  const { data: chart } = useSuspenseQuery(dashboardQueries.chartData());
+  const { data: stats } = useSuspenseQuery(dashboardQueries.stats())
+  const { data: chart } = useSuspenseQuery(dashboardQueries.chartData())
 
   return (
     <div>
       <StatsCard stats={stats} />
       <ChartDisplay data={chart} />
     </div>
-  );
+  )
 }
 ```
 
 ## Good Example: Progressive Enhancement
 
 ```tsx
-export const Route = createFileRoute("/posts/$postId")({
+export const Route = createFileRoute('/posts/$postId')({
   loader: async ({ params, context: { queryClient } }) => {
     // Critical: post content (await)
-    await queryClient.ensureQueryData(postQueries.detail(params.postId));
+    await queryClient.ensureQueryData(postQueries.detail(params.postId))
 
     // Start but don't block: comments, related posts
-    queryClient.prefetchQuery(commentQueries.forPost(params.postId));
-    queryClient.prefetchQuery(postQueries.related(params.postId));
+    queryClient.prefetchQuery(commentQueries.forPost(params.postId))
+    queryClient.prefetchQuery(postQueries.related(params.postId))
   },
   component: PostPage,
-});
+})
 
 function PostPage() {
-  const { postId } = Route.useParams();
-  const { data: post } = useSuspenseQuery(postQueries.detail(postId));
+  const { postId } = Route.useParams()
+  const { data: post } = useSuspenseQuery(postQueries.detail(postId))
 
   return (
     <article>
@@ -148,7 +148,7 @@ function PostPage() {
         <RelatedPosts postId={postId} />
       </Suspense>
     </article>
-  );
+  )
 }
 ```
 
@@ -173,7 +173,7 @@ function DashboardPage() {
         </Suspense>
       </ErrorBoundary>
     </div>
-  );
+  )
 }
 ```
 

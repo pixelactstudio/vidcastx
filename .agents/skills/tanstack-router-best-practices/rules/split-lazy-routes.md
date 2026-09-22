@@ -10,18 +10,17 @@ Split route components into `.lazy.tsx` files to reduce initial bundle size. The
 
 ```tsx
 // routes/dashboard.tsx - Everything in one file
-import { createFileRoute } from "@tanstack/react-router";
-import { ComplexDataGrid } from "complex-data-grid";
-import { HeavyChartLibrary } from "heavy-chart-library";
+import { createFileRoute } from '@tanstack/react-router'
+import { HeavyChartLibrary } from 'heavy-chart-library'
+import { ComplexDataGrid } from 'complex-data-grid'
+import { AnalyticsWidgets } from './components/AnalyticsWidgets'
 
-import { AnalyticsWidgets } from "./components/AnalyticsWidgets";
-
-export const Route = createFileRoute("/dashboard")({
+export const Route = createFileRoute('/dashboard')({
   loader: async ({ context }) => {
-    return context.queryClient.ensureQueryData(dashboardQueries.stats());
+    return context.queryClient.ensureQueryData(dashboardQueries.stats())
   },
-  component: DashboardPage, // Entire component in main bundle
-});
+  component: DashboardPage,  // Entire component in main bundle
+})
 
 function DashboardPage() {
   // Heavy components loaded even if user never visits dashboard
@@ -31,7 +30,7 @@ function DashboardPage() {
       <ComplexDataGrid />
       <AnalyticsWidgets />
     </div>
-  );
+  )
 }
 ```
 
@@ -39,43 +38,44 @@ function DashboardPage() {
 
 ```tsx
 // routes/dashboard.tsx - Only critical config
-// routes/dashboard.lazy.tsx - Lazy-loaded component
-import { createFileRoute, createLazyFileRoute } from "@tanstack/react-router";
-import { ComplexDataGrid } from "complex-data-grid";
-import { HeavyChartLibrary } from "heavy-chart-library";
+import { createFileRoute } from '@tanstack/react-router'
 
-import { AnalyticsWidgets } from "./components/AnalyticsWidgets";
-
-export const Route = createFileRoute("/dashboard")({
+export const Route = createFileRoute('/dashboard')({
   loader: async ({ context }) => {
-    return context.queryClient.ensureQueryData(dashboardQueries.stats());
+    return context.queryClient.ensureQueryData(dashboardQueries.stats())
   },
   // No component - it's in the lazy file
-});
+})
 
-export const Route = createLazyFileRoute("/dashboard")({
+// routes/dashboard.lazy.tsx - Lazy-loaded component
+import { createLazyFileRoute } from '@tanstack/react-router'
+import { HeavyChartLibrary } from 'heavy-chart-library'
+import { ComplexDataGrid } from 'complex-data-grid'
+import { AnalyticsWidgets } from './components/AnalyticsWidgets'
+
+export const Route = createLazyFileRoute('/dashboard')({
   component: DashboardPage,
   pendingComponent: DashboardSkeleton,
   errorComponent: DashboardError,
-});
+})
 
 function DashboardPage() {
-  const data = Route.useLoaderData();
+  const data = Route.useLoaderData()
   return (
     <div>
       <HeavyChartLibrary data={data} />
       <ComplexDataGrid />
       <AnalyticsWidgets />
     </div>
-  );
+  )
 }
 
 function DashboardSkeleton() {
-  return <div className="dashboard-skeleton">Loading dashboard...</div>;
+  return <div className="dashboard-skeleton">Loading dashboard...</div>
 }
 
 function DashboardError({ error }: { error: Error }) {
-  return <div>Failed to load dashboard: {error.message}</div>;
+  return <div>Failed to load dashboard: {error.message}</div>
 }
 ```
 
@@ -102,20 +102,20 @@ function DashboardError({ error }: { error: Error }) {
 
 ```tsx
 // routes/posts/$postId.lazy.tsx
-import { createLazyFileRoute, getRouteApi } from "@tanstack/react-router";
+import { createLazyFileRoute, getRouteApi } from '@tanstack/react-router'
 
-const route = getRouteApi("/posts/$postId");
+const route = getRouteApi('/posts/$postId')
 
-export const Route = createLazyFileRoute("/posts/$postId")({
+export const Route = createLazyFileRoute('/posts/$postId')({
   component: PostPage,
-});
+})
 
 function PostPage() {
   // Type-safe access without importing main route file
-  const { postId } = route.useParams();
-  const data = route.useLoaderData();
+  const { postId } = route.useParams()
+  const data = route.useLoaderData()
 
-  return <article>{/* ... */}</article>;
+  return <article>{/* ... */}</article>
 }
 ```
 
@@ -123,16 +123,16 @@ function PostPage() {
 
 ```tsx
 // vite.config.ts - Enable automatic splitting
-import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
+import { TanStackRouterVite } from '@tanstack/router-plugin/vite'
 
 export default defineConfig({
   plugins: [
     TanStackRouterVite({
-      autoCodeSplitting: true, // Automatically splits all route components
+      autoCodeSplitting: true,  // Automatically splits all route components
     }),
     react(),
   ],
-});
+})
 
 // With autoCodeSplitting, you don't need .lazy.tsx files
 // The plugin handles the splitting automatically

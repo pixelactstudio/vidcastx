@@ -1,5 +1,7 @@
 import { memo, useCallback } from "react";
-import { FileVideo, Globe, Lock, Pin, Play } from "lucide-react";
+import { Globe, Lock, Pin } from "lucide-react";
+
+import { VideoThumb } from "#app/components/video-thumb";
 
 import type { VideoSummary, VideoVisibility } from "../types";
 import { MediaCardShell } from "./media-card-shell";
@@ -36,20 +38,9 @@ function VisibilityIcon({ visibility }: { visibility: VideoVisibility }) {
   return <Lock className="size-3" />;
 }
 
-function hashHue(id: string): number {
-  let h = 0;
-  for (let i = 0; i < id.length; i++) h = (h * 31 + (id.codePointAt(i) ?? 0)) >>> 0;
-  return h % 360;
-}
-
 function VideoCardImpl({ video, onOpen, onTogglePin }: VideoCardProps) {
-  const { id, title, duration, visibility, createdAt, pinned } = video;
+  const { id, title, duration, visibility, createdAt, pinned, status, thumbnailUrl, previewUrl } = video;
   const formattedDuration = formatDuration(duration);
-  const hue = hashHue(id);
-
-  const gradient = {
-    backgroundImage: `linear-gradient(135deg, hsl(${hue} 65% 55%), hsl(${(hue + 40) % 360} 55% 35%))`,
-  };
 
   const handleOpen = useCallback(() => onOpen?.(id), [onOpen, id]);
   const handleTogglePin = useCallback(() => {
@@ -57,30 +48,23 @@ function VideoCardImpl({ video, onOpen, onTogglePin }: VideoCardProps) {
   }, [onTogglePin, video]);
 
   const thumb = (
-    <div className="bg-muted relative aspect-video w-full overflow-hidden" style={gradient}>
-      <div className="absolute inset-0 flex items-center justify-center">
-        <FileVideo className="size-10 text-white/30" />
-      </div>
-      <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors duration-200 group-hover:bg-black/20">
-        <Play
-          className="size-10 text-white opacity-0 drop-shadow-lg transition-opacity duration-200 group-hover:opacity-100"
-          fill="white"
-        />
-      </div>
-      {pinned && (
-        <span
-          className="bg-background/80 absolute top-1.5 right-1.5 inline-flex size-5 items-center justify-center"
-          aria-label="Pinned"
-        >
-          <Pin className="size-3" />
-        </span>
-      )}
-      {formattedDuration && (
-        <span className="absolute right-1.5 bottom-1.5 bg-black/80 px-1.5 py-0.5 text-[11px] font-medium text-white">
-          {formattedDuration}
-        </span>
-      )}
-    </div>
+    <VideoThumb
+      poster={thumbnailUrl}
+      preview={previewUrl}
+      title={title}
+      status={status}
+      duration={formattedDuration}
+      overlay={
+        pinned ? (
+          <span
+            className="bg-background/80 absolute top-1.5 right-1.5 inline-flex size-5 items-center justify-center"
+            aria-label="Pinned"
+          >
+            <Pin className="size-3" />
+          </span>
+        ) : undefined
+      }
+    />
   );
 
   const titleNode = <h3 className="line-clamp-2 text-sm leading-snug font-semibold group-hover:underline">{title}</h3>;

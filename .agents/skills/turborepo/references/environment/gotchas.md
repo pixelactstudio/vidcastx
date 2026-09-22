@@ -112,7 +112,7 @@ If you use `.env.development` and `.env.production`, both should be in inputs.
 
 ```json
 {
-  "$schema": "https://v2-8-21-canary-9.turborepo.dev/schema.json",
+  "$schema": "https://v2-11-3-canary-2.turborepo.dev/schema.json",
   "globalEnv": ["CI", "NODE_ENV", "VERCEL"],
   "globalPassThroughEnv": ["GITHUB_TOKEN", "VERCEL_URL"],
   "tasks": {
@@ -120,8 +120,14 @@ If you use `.env.development` and `.env.production`, both should be in inputs.
       "dependsOn": ["^build"],
       "env": ["DATABASE_URL", "NEXT_PUBLIC_*", "!NEXT_PUBLIC_ANALYTICS_ID"],
       "passThroughEnv": ["SENTRY_AUTH_TOKEN"],
-      "inputs": ["$TURBO_DEFAULT$", ".env", ".env.local", ".env.production", ".env.production.local"],
-      "outputs": [".next/**", "!.next/cache/**"]
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".env",
+        ".env.local",
+        ".env.production",
+        ".env.production.local"
+      ],
+      "outputs": [".next/**", "!.next/cache/**", "!.next/dev/**"]
     }
   }
 }
@@ -140,7 +146,7 @@ The same config using the `global` key. The `.env` files move to `global.inputs`
 
 ```json
 {
-  "$schema": "https://v2-8-21-canary-9.turborepo.dev/schema.json",
+  "$schema": "https://v2-11-3-canary-2.turborepo.dev/schema.json",
   "futureFlags": { "globalConfiguration": true },
   "global": {
     "env": ["CI", "NODE_ENV", "VERCEL"],
@@ -152,7 +158,7 @@ The same config using the `global` key. The `.env` files move to `global.inputs`
       "dependsOn": ["^build"],
       "env": ["DATABASE_URL", "NEXT_PUBLIC_*", "!NEXT_PUBLIC_ANALYTICS_ID"],
       "passThroughEnv": ["SENTRY_AUTH_TOKEN"],
-      "outputs": [".next/**", "!.next/cache/**"]
+      "outputs": [".next/**", "!.next/cache/**", "!.next/dev/**"]
     }
   }
 }

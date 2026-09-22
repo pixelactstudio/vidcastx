@@ -51,3 +51,7 @@ npm-debug.log*
 
 # Misc
 personal/
+
+# Claude Code local-only files
+.claude/settings.local.json
+.claude/worktrees/

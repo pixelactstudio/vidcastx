@@ -1,0 +1,309 @@
+---
+title: Transcoding
+description: How the worker turns a source file into adaptive HLS, a poster and a hover preview, and why each step exists.
+---
+
+This page explains what `workers/transcoder` does to a video and why. It starts with the concepts (HLS and adaptive bitrate), then walks through the code in `workers/transcoder/src/ffmpeg/` one step at a time.
+
+## Why transcode at all
+
+Source files arrive in whatever format the camera, phone or screen recorder produced. They might be HEVC in a MOV container, 4K at 60 fps, 200 Mb/s ProRes, or a variable-frame-rate screen capture. Handing that file to a viewer has three problems:
+
+- **Compatibility**: not every browser can decode every codec and container.
+- **Size**: a file that is fine on a LAN will stall on a phone connection.
+- **Seeking**: to jump to minute 40 of one big progressive file, the player needs byte-range support and a well-placed index.
+
+Transcoding re-encodes the source into formats that every client can play, at several sizes, cut into small pieces that are cheap to fetch. VidcastX uses H.264 video and AAC audio in MPEG-TS segments, delivered with HLS. That is the most widely supported combination: Safari plays it natively, and other browsers play it through Media Source Extensions with a library such as hls.js.
+
+## HLS in one page
+
+HTTP Live Streaming (HLS) is a set of plain files served over plain HTTP:
+
+- **Segments** (`.ts`): short chunks of the video, a few seconds each.
+- **Media playlists** (`.m3u8`): text files that list one rendition's segments in order, with the duration of each.
+- **A master playlist** (`master.m3u8`): lists every rendition with its bandwidth and resolution.
+
+The player downloads the master playlist and picks a rendition. It then downloads that rendition's media playlist and fetches segments one after another. To seek, it computes which segment holds the target time and fetches that one. There is no streaming server; any static file host, object store or CDN can serve HLS, and every file is cacheable.
+
+VidcastX writes **VOD** playlists. The playlist is complete when written, marked with `#EXT-X-PLAYLIST-TYPE:VOD`, and closed with `#EXT-X-ENDLIST`. A live stream would instead keep appending segments.
+
+## Adaptive bitrate (ABR)
+
+Encode the same video several times at different resolutions and bitrates, and you have an **encoding ladder**. Each rung is a rendition. While the video plays, the player measures how fast segments arrive and how full its buffer is. It moves up the ladder when bandwidth allows and drops down before the buffer runs dry. It can switch at every segment boundary, which is why segments are short.
+
+A good ladder has:
+
+- a top rung that looks close to the source on a large screen,
+- a bottom rung that plays on a weak mobile connection,
+- no rung larger than the source, because upscaling spends bits without adding detail.
+
+## What the worker does
+
+```text
+source.mp4
+   │
+   ├─ 1. ffprobe ─────────────► height, fps, duration, has audio
+   │
+   ├─ 2. buildStreamVariants ──► ladder, e.g. [1080p, 720p, 480p]
+   │
+   ├─ 3. ffmpeg (one process) ─► master.m3u8
+   │                             1080p_playlist.m3u8, 1080p_segment000.ts, …
+   │                             720p_playlist.m3u8,  720p_segment000.ts,  …
+   │                             480p_playlist.m3u8,  480p_segment000.ts,  …
+   │
+   ├─ 4. upload everything to processed/{orgId}/{videoId}/
+   │
+   └─ 5. in parallel:  poster.jpg  +  preview.webm
+```
+
+[Video pipeline](/docs/architecture/video-pipeline) covers how the job arrives and how results reach the API. The rest of this page covers steps 1 to 3 and 5.
+
+## Step 1: probe the source
+
+`src/ffmpeg/probe.ts` runs:
+
+```bash
+ffprobe -v error \
+  -show_entries stream=codec_type,height,duration,r_frame_rate:format=duration \
+  -of json source-video.mp4
+```
+
+From the JSON output it keeps four facts:
+
+| Field      | Source                                                    | Fallback |
+| ---------- | --------------------------------------------------------- | -------- |
+| `height`   | first video stream's `height`                             | `1080`   |
+| `fps`      | `r_frame_rate` (a fraction like `30000/1001`), rounded    | `30`     |
+| `duration` | video stream `duration`, else container `format.duration` | `0`      |
+| `hasAudio` | whether any stream has `codec_type: audio`                | –        |
+
+`hasAudio` matters because mapping an audio stream that doesn't exist makes FFmpeg fail. The ladder decisions come next and depend only on height and frame rate.
+
+## Step 2: build the ladder
+
+`src/ffmpeg/variants.ts` starts from three base rungs, sized for 30 fps:
+
+| Rung  | Height | Base bitrate |
+| ----- | ------ | ------------ |
+| 1080p | 1080   | 5000 kb/s    |
+| 720p  | 720    | 2800 kb/s    |
+| 480p  | 480    | 1400 kb/s    |
+
+A 2160p (4K) rung at 15000 kb/s is written in the file but commented out.
+
+`buildStreamVariants(sourceHeight, sourceFps)` then applies these rules:
+
+1. **No upscaling above the source.** It skips any rung taller than the source, except 480p, which is always produced. A 1080p source gets all three rungs, and a 720p source gets 720p and 480p.
+2. **Every rung gets a 30 fps-or-lower variant** at `min(sourceFps, 30)`. A 24 fps film stays at 24 fps, and a 60 fps game capture gets a 30 fps variant.
+3. **High-frame-rate variants for 720p and up.** If the source is at least 58 fps, it adds a 60 fps variant. Between 115 and 139 fps it also adds 120, and at 140 or more it adds 144. The thresholds sit just below each target so that 59.94 fps and 119.88 fps sources qualify.
+4. **More frames cost more bits.** The base bitrate is multiplied by 1.5 for up to 60 fps, 2.4 for up to 120 fps, and 3 above that. High-frame-rate variants get the rate in their name, such as `1080p60`.
+
+<Tabs items={["1080p30 source", "4K60 source", "720p30 source", "360p source"]}>
+  <Tab value="1080p30 source">
+    | Variant | Size      | fps | Bitrate   |
+    | ------- | --------- | --- | --------- |
+    | 1080p   | 1080 rows | 30  | 5000 kb/s |
+    | 720p    | 720 rows  | 30  | 2800 kb/s |
+    | 480p    | 480 rows  | 30  | 1400 kb/s |
+  </Tab>
+  <Tab value="4K60 source">
+    With no 4K rung enabled, 1080p is the top of the ladder.
+
+    | Variant | Size      | fps | Bitrate   |
+    | ------- | --------- | --- | --------- |
+    | 1080p   | 1080 rows | 30  | 5000 kb/s |
+    | 1080p60 | 1080 rows | 60  | 7500 kb/s |
+    | 720p    | 720 rows  | 30  | 2800 kb/s |
+    | 720p60  | 720 rows  | 60  | 4200 kb/s |
+    | 480p    | 480 rows  | 30  | 1400 kb/s |
+
+  </Tab>
+  <Tab value="720p30 source">
+    | Variant | Size     | fps | Bitrate   |
+    | ------- | -------- | --- | --------- |
+    | 720p    | 720 rows | 30  | 2800 kb/s |
+    | 480p    | 480 rows | 30  | 1400 kb/s |
+  </Tab>
+  <Tab value="360p source">
+    Only the 480p floor applies, so this source **is** upscaled to 480 rows.
+
+    | Variant | Size     | fps | Bitrate   |
+    | ------- | -------- | --- | --------- |
+    | 480p    | 480 rows | 30  | 1400 kb/s |
+
+  </Tab>
+</Tabs>
+
+## Step 3: one FFmpeg command for the whole ladder
+
+`src/ffmpeg/transcode.ts` builds a single `ffmpeg` invocation. FFmpeg decodes the source once and feeds the frames to one encoder per rung, which is much cheaper than decoding the file once per rung.
+
+For a 16:9, 1080p30 source with audio and the default `libx264` encoder, the command it builds is:
+
+```bash
+ffmpeg -i source-video.mp4 -y \
+  -map 0:v:0 -map 0:a:0 \
+  -c:v:0 libx264 -b:v:0 5000k -maxrate:v:0 5250k -bufsize:v:0 7500k \
+  -filter:v:0 scale=-2:1080 -r:v:0 30 -preset fast -crf 23 \
+  -c:a:0 aac -b:a:0 128k -ac:0 2 \
+  -map 0:v:0 -map 0:a:0 \
+  -c:v:1 libx264 -b:v:1 2800k -maxrate:v:1 2940k -bufsize:v:1 4200k \
+  -filter:v:1 scale=-2:720 -r:v:1 30 -preset fast -crf 23 \
+  -c:a:1 aac -b:a:1 128k -ac:1 2 \
+  -map 0:v:0 -map 0:a:0 \
+  -c:v:2 libx264 -b:v:2 1400k -maxrate:v:2 1470k -bufsize:v:2 2100k \
+  -filter:v:2 scale=-2:480 -r:v:2 30 -preset fast -crf 23 \
+  -c:a:2 aac -b:a:2 128k -ac:2 2 \
+  -f hls -hls_time 6 -hls_playlist_type vod \
+  -hls_segment_filename output_hls/%v_segment%03d.ts \
+  -master_pl_name master.m3u8 \
+  -var_stream_map "v:0,a:0,name:1080p v:1,a:1,name:720p v:2,a:2,name:480p" \
+  output_hls/%v_playlist.m3u8
+```
+
+The sections below take it apart.
+
+### Mapping: one input, many outputs
+
+`-map 0:v:0 -map 0:a:0` means "take the first video and first audio stream of input 0". Repeating the pair once per rung creates three video and three audio **output** streams from the same decoded source. When the source has no audio, the audio maps and audio options are left out.
+
+### Stream specifiers
+
+Options like `-c:v:1` carry a stream specifier after the colon. `v:1` means "the second **video** output stream", so `-b:v:1 2800k` only applies to the 720p encode. `a:2` means the third audio output stream. Options with no specifier, like `-preset fast` and `-crf 23`, apply to every output stream they are valid for.
+
+### Scaling and frame rate
+
+- `scale=-2:1080` sets the height to 1080 and computes the width from the aspect ratio. The `-2` rounds the width to an even number, because H.264 with 4:2:0 chroma needs even dimensions.
+- `-r:v:0 30` sets the output frame rate for that stream. FFmpeg drops or duplicates frames to hit it.
+
+### Rate control: capped CRF
+
+Each rung passes three numbers: `-b:v` (the ladder bitrate), `-maxrate` (1.05 × that), and `-bufsize` (1.5 × that). With `libx264` the worker also passes `-crf 23`.
+
+- **CRF** (Constant Rate Factor) targets a consistent visual quality and lets the bitrate follow the content. A static slide deck needs few bits, and confetti needs many. 23 is libx264's default, and lower numbers mean higher quality. When CRF is set, libx264 uses it instead of the `-b:v` average target.
+- **`-maxrate` with `-bufsize`** configures the VBV (video buffering verifier), a model of the player's buffer. The encoder may not exceed `maxrate` over the window that `bufsize` describes. A smaller buffer enforces the cap more tightly.
+
+Together this is **capped CRF**: quality-driven encoding that never exceeds the ladder bitrate. Easy content comes out smaller than the ladder number, and hard content is held at the cap so the rung stays playable at the bandwidth the master playlist advertises.
+
+With a hardware encoder (`HW_ENCODER`), the worker does not pass `-crf`. `-b:v` becomes the average bitrate target, and `-maxrate`/`-bufsize` still constrain it.
+
+`-preset fast` trades compression efficiency for speed. Slower presets make smaller files at the same quality but take longer to encode.
+
+### Audio
+
+Each rung gets AAC at 128 kb/s, requested as stereo. Every variant carries its own audio copy muxed into its segments, so the player gets picture and sound from the same segment file.
+
+### The HLS muxer
+
+| Option                                      | Effect                                                                                                                      |
+| ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `-f hls`                                    | Write HLS: playlists plus MPEG-TS segments.                                                                                 |
+| `-hls_time 6`                               | Target segment length of 6 seconds. FFmpeg can only cut at a keyframe, so segments run 6 s or longer (except the last one). |
+| `-hls_playlist_type vod`                    | Keep every segment, and mark the playlist `VOD` and complete (`#EXT-X-ENDLIST`).                                            |
+| `-hls_segment_filename …/%v_segment%03d.ts` | Segment names: `%v` is the variant name, `%03d` is a zero-padded counter.                                                   |
+| `-var_stream_map "v:0,a:0,name:1080p …"`    | Groups output streams into variants: video 0 with audio 0 is the variant named `1080p`, and so on.                          |
+| `-master_pl_name master.m3u8`               | Also write a master playlist that lists every variant.                                                                      |
+| `…/%v_playlist.m3u8`                        | The media playlist name per variant.                                                                                        |
+
+### What comes out
+
+For the 1080p example, `output_hls/` contains:
+
+```text
+master.m3u8
+1080p_playlist.m3u8   1080p_segment000.ts   1080p_segment001.ts   …
+720p_playlist.m3u8    720p_segment000.ts    720p_segment001.ts    …
+480p_playlist.m3u8    480p_segment000.ts    480p_segment001.ts    …
+```
+
+The master playlist has one entry per variant. FFmpeg computes `BANDWIDTH` from the stream bitrates. Attributes are abbreviated here:
+
+```text
+#EXTM3U
+#EXT-X-VERSION:3
+#EXT-X-STREAM-INF:BANDWIDTH=…,RESOLUTION=1920x1080
+1080p_playlist.m3u8
+
+#EXT-X-STREAM-INF:BANDWIDTH=…,RESOLUTION=1280x720
+720p_playlist.m3u8
+
+#EXT-X-STREAM-INF:BANDWIDTH=…,RESOLUTION=854x480
+480p_playlist.m3u8
+```
+
+Each media playlist lists its segments. The durations below are illustrative:
+
+```text
+#EXTM3U
+#EXT-X-VERSION:3
+#EXT-X-TARGETDURATION:9
+#EXT-X-MEDIA-SEQUENCE:0
+#EXT-X-PLAYLIST-TYPE:VOD
+#EXTINF:8.333333,
+1080p_segment000.ts
+#EXTINF:6.200000,
+1080p_segment001.ts
+…
+#EXT-X-ENDLIST
+```
+
+Every URI in these playlists is relative, so the directory works wherever it is hosted. The worker uploads it as-is to `processed/{orgId}/{videoId}/`.
+
+### Progress
+
+FFmpeg prints lines like `frame= 1234 … time=00:00:41.20 …` to stderr. The worker parses the `time=` value, divides it by the probed duration, and maps the result onto 10–90% of the BullMQ job progress. It caps the value at 99% until FFmpeg exits cleanly.
+
+## Step 5: poster and hover preview
+
+After the HLS upload, the worker makes two small derived assets in parallel. If either one fails, the error is logged and the video still becomes `ready`, without that asset.
+
+### Poster frame
+
+`src/ffmpeg/poster.ts`:
+
+```bash
+ffmpeg -y -ss 3 -i source-video.mp4 -frames:v 1 -vf scale=1280:-2 -q:v 3 poster.jpg
+```
+
+- `-ss 3` **before** `-i` is input seeking. FFmpeg jumps close to the 3 s mark using the container index instead of decoding everything before it. Three seconds in usually skips black frames and fade-ins.
+- `-frames:v 1` writes one frame.
+- `scale=1280:-2` makes the image 1280 px wide with an even, aspect-correct height.
+- `-q:v 3` sets JPEG quality on FFmpeg's 2–31 scale, where lower is better. 3 is high quality.
+
+The JPEG is uploaded to `thumbnails/{orgId}/{videoId}.jpg`.
+
+### Hover preview
+
+`src/ffmpeg/preview.ts`:
+
+```bash
+ffmpeg -y -ss 3 -i source-video.mp4 -t 6 -an \
+  -vf scale=480:-2,fps=15 \
+  -c:v libvpx-vp9 -b:v 400k -deadline realtime -cpu-used 5 \
+  preview.webm
+```
+
+- `-t 6 -an`: six seconds, audio dropped. Browsers generally only let muted video start without a click, so a hover preview has no use for sound.
+- `scale=480:-2,fps=15`: small and choppy on purpose. It plays in a thumbnail-sized card.
+- VP9 at 400 kb/s: about 300 KB for the whole clip (400 kb/s × 6 s = 2400 kb).
+- `-deadline realtime -cpu-used 5`: libvpx's fastest settings. For a throwaway clip, encode time matters more than squeezing out the last few bytes.
+
+The file is uploaded to `previews/{orgId}/{videoId}.webm` and recorded as an asset of type `preview_gif`. The type name is historical; the file is WebM. The dashboard's video card plays it in a muted `<video>` element on hover.
+
+## Hardware encoders
+
+`HW_ENCODER` in `.env` replaces `libx264` in every rung. The values are `h264_nvenc` (NVIDIA), `h264_videotoolbox` (Apple Silicon) and `h264_amf` (AMD). GPU encoders are much faster, but at the same bitrate they usually compress less well than libx264.
+
+`-preset fast` is passed whichever encoder you choose. Not every hardware encoder has a preset option with that name. Check with `ffmpeg -h encoder=<name>`.
+
+## Limits of the current approach
+
+These are deliberate simplifications or known gaps in the checked-in code. They are useful to understand before you change the ladder.
+
+- **Keyframes are not aligned across renditions.** The command doesn't set `-g`, `-keyint_min`, `-sc_threshold` or `-force_key_frames`. The encoder places keyframes itself (libx264 defaults to at most 250 frames apart, plus extra ones at scene cuts), so segments run 6 s or longer (except the last one) and their boundaries can differ between rungs. Players cope, but a fixed GOP gives cleaner switches and predictable segment lengths. A fixed GOP is typically 2× the frame rate with scene-cut keyframes disabled, or keyframes forced every `hls_time` seconds.
+- **Sources below 480p are upscaled** to the 480p floor.
+- **Frame rates between 31 and 57 fps become 30 fps.** A 50 fps source gets only 30 fps variants.
+- **Audio is encoded once per rung.** The copies are identical. A separate audio rendition (`#EXT-X-MEDIA`) would encode it once.
+- **`-ac:${idx}` addresses the wrong stream.** A bare number in a stream specifier selects the output stream with that index, not the audio stream. Output streams alternate video, audio, video, audio, so `-ac:0 2` targets a video stream. The per-audio-stream form is `-ac:a:${idx}`.
+- **One video, one process, one job at a time.** The worker runs with `concurrency: 1`. `CONCURRENT_JOBS` is defined in `env.ts` but not read. `workers/transcoder/ROADMAP.md` describes the next step, chunked transcoding: split at keyframes, encode chunks on many workers, then stitch the playlists.
+- **H.264 and MPEG-TS only.** There are no HEVC, AV1 or fragmented-MP4 (CMAF) outputs yet.

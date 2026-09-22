@@ -2,6 +2,7 @@ import { and, desc, eq, isNull, sql } from "@vidcastx/database";
 import { db } from "@vidcastx/database/client";
 import { folders } from "@vidcastx/database/schema/folder-schema";
 import { videos } from "@vidcastx/database/schema/video-schema";
+import { getDownloadUrl } from "@vidcastx/storage";
 
 type Folder = typeof folders.$inferSelect;
 
@@ -22,6 +23,8 @@ interface VideoSummaryRow {
   status: typeof videos.$inferSelect.status;
   createdAt: Date;
   updatedAt: Date;
+  thumbnailUrl: string | null;
+  previewUrl: string | null;
 }
 
 const folderSummaryCols = {
@@ -35,18 +38,6 @@ const folderSummaryCols = {
   pinned: folders.pinned,
   createdAt: folders.createdAt,
   updatedAt: folders.updatedAt,
-};
-
-const videoSummaryCols = {
-  id: videos.id,
-  title: videos.title,
-  folderId: videos.folderId,
-  visibility: videos.visibility,
-  pinned: videos.pinned,
-  duration: videos.duration,
-  status: videos.status,
-  createdAt: videos.createdAt,
-  updatedAt: videos.updatedAt,
 };
 
 async function getDescendantIds(folderId: string, orgId: string): Promise<string[]> {
@@ -138,18 +129,44 @@ export const FolderService = {
   },
 
   async listChildVideos(orgId: string, parentId: string | null): Promise<VideoSummaryRow[]> {
-    const rows = await db
-      .select(videoSummaryCols)
-      .from(videos)
-      .where(
-        and(
-          eq(videos.orgId, orgId),
-          isNull(videos.deletedAt),
-          parentId === null ? isNull(videos.folderId) : eq(videos.folderId, parentId),
-        ),
-      )
-      .orderBy(desc(videos.createdAt));
-    return rows;
+    const rows = await db.query.videos.findMany({
+      columns: {
+        id: true,
+        title: true,
+        folderId: true,
+        visibility: true,
+        pinned: true,
+        duration: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+      where: and(
+        eq(videos.orgId, orgId),
+        isNull(videos.deletedAt),
+        parentId === null ? isNull(videos.folderId) : eq(videos.folderId, parentId),
+      ),
+      orderBy: [desc(videos.createdAt)],
+      with: {
+        assets: {
+          columns: { type: true, storageKey: true },
+        },
+      },
+    });
+
+    return Promise.all(
+      rows.map(async (v) => {
+        const assetMap = new Map(v.assets.map((a) => [a.type, a]));
+        const thumb = assetMap.get("thumbnail");
+        const preview = assetMap.get("preview_gif");
+        const [thumbnailUrl, previewUrl] = await Promise.all([
+          thumb ? getDownloadUrl(thumb.storageKey) : Promise.resolve(null),
+          preview ? getDownloadUrl(preview.storageKey) : Promise.resolve(null),
+        ]);
+        const { assets: _assets, ...rest } = v;
+        return { ...rest, thumbnailUrl, previewUrl };
+      }),
+    );
   },
 
   async browse(orgId: string, parentId: string | null) {

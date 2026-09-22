@@ -24,7 +24,7 @@ import {
   DropdownMenuTrigger,
 } from "@vidcastx/ui/components/dropdown-menu";
 
-import { VideoThumb } from "./video-thumb";
+import { VideoThumb } from "#app/components/video-thumb";
 
 interface VideoCardVideo {
   id: string;

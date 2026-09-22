@@ -1,0 +1,129 @@
+---
+title: Quickstart
+description: Run the full VidcastX stack on your machine.
+---
+
+## Prerequisites
+
+- **Node.js 22.13+** (`.nvmrc` pins 22.21.1)
+- **pnpm 11**: the root `package.json` pins `pnpm@11.15.0`; `corepack enable` picks it up
+- **Bun**: the API runs on Bun
+- **Docker** with Docker Compose, for PostgreSQL, Redis and MinIO
+- **FFmpeg** with `ffprobe` on your `PATH`. The worker spawns both binaries. The hover preview uses the `libvpx-vp9` encoder, which most FFmpeg builds include.
+
+## Setup
+
+<Steps>
+<Step>
+
+### Clone and configure
+
+```bash
+git clone https://github.com/pixelactstudio/vidcastx.git
+cd vidcastx
+cp .env.example .env
+```
+
+The defaults in `.env.example` line up with `docker-compose.yml`, so the stack runs without edits. They are local-only placeholders. Replace every secret before using a shared environment.
+
+</Step>
+<Step>
+
+### Install dependencies
+
+```bash
+pnpm install
+```
+
+The `postinstall` hook runs `sherif` to check that dependency versions are consistent across workspaces.
+
+</Step>
+<Step>
+
+### Start the infrastructure
+
+```bash
+docker compose up -d
+```
+
+This starts PostgreSQL 16 with pgvector, Redis, and MinIO. It also runs a one-shot `createbuckets` container that creates `vidcastx-bucket` and allows anonymous reads on it.
+
+</Step>
+<Step>
+
+### Apply database migrations
+
+```bash
+pnpm db:migrate
+```
+
+This runs `drizzle-kit migrate` against `DATABASE_URL`. The migration files live in `packages/database`.
+
+</Step>
+<Step>
+
+### Start everything
+
+```bash
+pnpm dev
+```
+
+Turbo runs the `dev` script of every workspace: the API, the dashboard, the transcoder worker, Drizzle Studio, and these docs.
+
+</Step>
+</Steps>
+
+Open [http://localhost:4000](http://localhost:4000), sign up, create an organization during onboarding, and upload a video. The transcoder logs FFmpeg progress in the terminal. The video moves to `ready` when the worker reports back.
+
+<Callout title="Verifying your email locally">
+  Email/password sign-up requires a verified email, and no mail provider is wired up yet. The API prints the
+  verification link to its terminal (`Verification URL: ...`). The link expires after 60 seconds. If it expires, sign in
+  again and a fresh link is printed. GitHub and Discord sign-in only work after you add their OAuth credentials to
+  `.env`.
+</Callout>
+
+## Local endpoints
+
+| Service                | Address                           | Defined in                                       |
+| ---------------------- | --------------------------------- | ------------------------------------------------ |
+| Dashboard (`apps/app`) | `http://localhost:4000`           | `apps/app/package.json` (`vite dev --port 4000`) |
+| API (`apps/api`)       | `http://localhost:4001`           | `PORT` in `.env`                                 |
+| OpenAPI reference      | `http://localhost:4001/openapi`   | `@elysiajs/openapi` in `apps/api/src/index.ts`   |
+| Docs (`apps/docs`)     | `http://localhost:4002`           | `apps/docs/package.json`                         |
+| PostgreSQL             | `localhost:5432`                  | `docker-compose.yml`                             |
+| Redis                  | `localhost:6380` (container 6379) | `docker-compose.yml`                             |
+| MinIO S3 API           | `http://localhost:9000`           | `docker-compose.yml`                             |
+| MinIO console          | `http://localhost:9001`           | `docker-compose.yml`                             |
+
+<Callout title="Redis is on 6380, not 6379">
+  Compose maps Redis to host port **6380** so it doesn't collide with a Redis you may already run on 6379.
+  `.env.example` sets `REDIS_PORT=6380` to match.
+</Callout>
+
+<Callout type="warn" title="Changing the MinIO credentials">
+  The `createbuckets` sidecar logs in with the literal credentials `admin` / `password`. It ignores `MINIO_USER` and
+  `MINIO_PASSWORD`. If you change those two variables, create the bucket yourself in the MinIO console.
+</Callout>
+
+## Running one piece at a time
+
+```bash
+pnpm dev:app    # dashboard and the packages it depends on
+pnpm dev:api    # API and the packages it depends on
+pnpm dev:docs   # this documentation site
+```
+
+The transcoder has no root shortcut. Run it with `pnpm --filter transcoder dev`.
+
+## Hardware encoding
+
+The worker encodes with `libx264` on the CPU by default. To use a GPU encoder, set `HW_ENCODER` in `.env`:
+
+| Value               | Hardware      |
+| ------------------- | ------------- |
+| `libx264`           | CPU (default) |
+| `h264_nvenc`        | NVIDIA        |
+| `h264_videotoolbox` | Apple Silicon |
+| `h264_amf`          | AMD           |
+
+Your FFmpeg build must include the encoder you pick. See [Transcoding](/docs/architecture/transcoding) for how the choice changes rate control.

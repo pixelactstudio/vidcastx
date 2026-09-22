@@ -1,249 +1,129 @@
-# VidcastX - Architecture & Project Scope
+# VidcastX — product definition
 
-VidcastX is an enterprise-grade, B2B video hosting, streaming, and AI-processing platform. Unlike consumer-oriented platforms, VidcastX is designed specifically for creators, businesses, and developers to host, transcode, analyze, and distribute their video content globally via embeddable players and robust APIs.
+VidcastX is open-source, self-hostable video infrastructure: an API that takes a video in and hands back an adaptive HLS stream, thumbnails, an embeddable player and webhooks. It is a **Mux-shaped** platform you run on your own servers and your own S3-compatible storage, MIT-licensed, with every stage of the pipeline written to be read and learned from.
 
-This document outlines the core feature set, the monorepo structure, the microservices architecture, and the database relationships driving the platform.
+This file is the source of truth for **what VidcastX is and what V1 contains**. The plan and progress live in [`tasks/todo.md`](tasks/todo.md); how-it-works documentation lives in [`apps/docs`](apps/docs); code conventions live in [`.claude/rules/`](.claude/rules/).
 
-## 1. Core Platform Features
+## Audience
 
-VidcastX provides a comprehensive suite of tools spanning the entire video lifecycle, from ingestion to analytics and playback.
+1. **Developers embedding video in their product**: course platforms, SaaS onboarding and demo videos, internal tools. They call the API from their backend, receive webhooks, and drop the player into their frontend.
+2. **Engineers learning how video infrastructure works**: they clone the repo to see a real upload → transcode → HLS → playback pipeline, with docs that explain the why.
 
-### Video Hosting & Playback
+## Positioning
 
-- **Secure Direct Uploads:** Client-to-cloud uploads via presigned URLs, bypassing the main API to ensure infinite scalability for massive files.
+|                | Mux / api.video / Cloudflare Stream | VidcastX                                  |
+| -------------- | ----------------------------------- | ----------------------------------------- |
+| Hosting        | Their cloud                         | Your servers, your bucket (S3, R2, MinIO) |
+| Pricing        | Per minute encoded, stored, viewed  | Your infrastructure cost                  |
+| Pipeline       | Closed                              | Readable FFmpeg, documented step by step  |
+| Data residency | Vendor regions                      | Wherever you deploy                       |
 
-- **Adaptive Bitrate Streaming (HLS):** Automated FFmpeg transcoding into multiple resolutions (1080p, 720p, 480p) to guarantee smooth playback across varying network conditions.
+## Principles
 
-- **Drop-in NPM Video Player:** A highly customizable, embeddable video player package (`@vidcastx/player`). Serving as the sole frontend for video consumption, it seamlessly handles adaptive streaming while acting as the data collection engine for all platform analytics.
+Use these to settle design questions the V1 scope leaves open.
 
-- **Content Organization:** Deep hierarchical folder structures and granular visibility controls (Public, Private, Unlisted).
+- **Mux-shaped.** When unsure how a resource, endpoint, event or player option should look, follow Mux's model: direct uploads, playback IDs, public vs signed playback, `passthrough` metadata, signed webhooks. Deviate only for self-hosting or readability, and record why.
+- **Self-host first.** `docker compose up` runs the whole stack. Every required dependency is open source and runs locally; any S3-compatible store works. Cloud services are optional adapters.
+- **Readable pipeline.** The transcoder drives the FFmpeg CLI with commands a learner can copy and run. Prefer the clear implementation over the clever one, and explain the reasoning in `apps/docs`.
+- **Narrow and solid.** Finish and harden the V1 surface before adding breadth. A feature ships with tests, docs and a working path through the dashboard.
+- **The API orchestrates, never touches bytes.** Uploads go client → storage, transcoding happens in workers, delivery reads from storage.
+- **Allowlisted responses.** Responses expose only what the consumer needs (`.claude/rules/response-hygiene.md`).
 
-- **Smart Thumbnails:** Automated extraction of optimized keyframes for video previews.
+## Domain model
 
-### AI-Powered Automation
+| Term                 | Meaning                                                                                                                        |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| **Organization**     | Unit of isolation; every resource is org-scoped. Members are Owner, Admin or Member. Plays the part of a Mux _environment_.    |
+| **Video**            | The central resource (Mux calls it an _asset_). Holds metadata, status, duration, max resolution and `passthrough`.            |
+| **Asset**            | One output file of a video: HLS playlist, poster, preview, storyboard, source. Internal; its storage key never leaves the API. |
+| **Upload**           | A direct-upload session that creates a video. Large files use S3 multipart (Uppy in the dashboard).                            |
+| **Playback ID**      | Public handle used to stream a video. A video has one or more, each with a **playback policy**: `public` or `signed`.          |
+| **Signing key**      | Per-org key the customer's backend uses to mint short-lived playback tokens (JWT) for `signed` playback IDs.                   |
+| **API key**          | Token ID + secret for server-to-server calls. The dashboard authenticates with browser sessions; the public API with API keys. |
+| **Webhook endpoint** | Customer URL subscribed to events. Each **delivery** is HMAC-signed, logged and retried with backoff.                          |
+| **Folder**           | Dashboard-only grouping of videos (nested, pinnable). Not part of the public API contract.                                     |
 
-- **Precision Transcription:** Integration with OpenAI Whisper for highly accurate, noise-resistant speech-to-text generation.
+**Video status.** Internally a video moves `draft → uploaded → queued → dispatched → processing → ready | failed`. The public API reports `waiting → processing → ready | errored`; the internal states stay internal.
 
-- **Intelligent Metadata:** LLM-driven generation of SEO-optimized titles, descriptions, and interactive video chapters based on transcript context.
+## V1 scope
 
-- **Multilingual Dubbing:** Voice cloning and translation via ElevenLabs to automatically localize content for global audiences while maintaining original vocal emotion.
+V1 is the version that launches publicly. Everything in this section ships in V1; everything else sits in [Beyond V1](#beyond-v1).
 
-- **Semantic Search:** Generation of vector embeddings for transcripts, enabling users to search for specific spoken concepts _inside_ their video library.
+### Developer API (`apps/api`)
 
-### Enterprise Analytics & Telemetry
+| Group        | Endpoints                                                                                        |
+| ------------ | ------------------------------------------------------------------------------------------------ |
+| Videos       | `POST /v1/videos` (ingest from URL), `GET /v1/videos`, `GET` / `PATCH` / `DELETE /v1/videos/:id` |
+| Uploads      | `POST /v1/uploads`, `GET /v1/uploads/:id`, multipart part signing and completion for large files |
+| Playback IDs | `POST /v1/videos/:id/playback-ids`, `DELETE /v1/videos/:id/playback-ids/:playbackId`             |
+| Signing keys | `POST` / `GET` / `DELETE /v1/signing-keys`                                                       |
+| Webhooks     | Endpoint CRUD, a test ping, and the delivery log                                                 |
 
-- **Granular Session Tracking:** High-resolution tracking of device types, geographic regions, buffering events, quality drops, and exact watch percentages automatically collected by the NPM player.
+The public API authenticates with API keys, the dashboard with sessions. `DELETE` removes the video's files from storage. OpenAPI docs are generated from the TypeBox schemas.
 
-- **Audience Insights:** Video heatmaps detailing re-watches and viewer drop-off points.
+### Delivery
 
-- **Distribution Metrics:** Embed domain tracking to help businesses measure ROI and engagement on external websites.
+Public routes keyed by playback ID, no API key:
 
-### Live Streaming (RTMP)
+- `GET /stream/:playbackId.m3u8` checks the playback token for `signed` IDs and serves the master playlist with signed URLs for variant playlists and segments, so the bucket stays private.
+- `GET /image/:playbackId/thumbnail.jpg`, `/storyboard.vtt` (with its sprite), `/preview.webm`.
 
-- **Broadcast Ingestion:** Secure RTMP channel and stream key generation.
+### Transcoding (`workers/transcoder`)
 
-- **Auto-VOD:** Automatic conversion and saving of finished live streams into Video on Demand (VOD) assets.
+Per video:
 
-### B2B Workspace & Billing
+- an HLS ladder (1080p / 720p / 480p, capped at the source resolution, extra high-frame-rate rungs for high-fps sources)
+- 8-bit `yuv420p` video so every browser can decode it, stereo AAC audio
+- correct output for rotated phone video and for videos with no audio track
+- a poster JPG, a short hover preview, and a storyboard sprite + VTT for scrub thumbnails
+- idempotent retries: a retried job leaves one set of asset rows
 
-- **Organization Management:** Role-Based Access Control (Owner, Admin, Member) with sophisticated soft-delete mechanisms.
+### Webhooks
 
-- **Usage-Based Billing:** Aggregation of encoding minutes, AI tokens, storage GB, and bandwidth GB for seamless Stripe metering.
+Events: `video.created`, `video.processing`, `video.ready`, `video.errored`, `video.deleted`. Payloads carry the public video shape, including playback IDs and `passthrough`.
 
-- **Developer Extensibility:** Dedicated webhook dispatcher to notify external client systems of processing lifecycle events.
+### Player (`packages/player`)
 
-## 2. Monorepo Structure Overview
+`<vidcastx-player playback-id="…">` web component plus a thin React wrapper: HLS playback (native on Safari, hls.js elsewhere), a `token` attribute for signed playback, and the poster and storyboard wired in automatically.
 
-The repository is structured as a Turbo-driven monorepo containing user-facing frontends (`apps`), the core backend (`api`), containerized background processors (`workers`), and shared internal libraries (`packages`).
+### Dashboard (`apps/app`)
 
-    ├── apps/
-    │   ├── dashboard/       # Next.js Creator Studio & Admin Panel
-    │   ├── marketing/       # Next.js Landing Page & Documentation
-    │   └── api/             # Core Hono/Express API
-    ├── workers/             # Dockerized Node.js/Python Background Services
-    │   ├── transcoder/      # Raw FFmpeg CLI: Video/Audio encoding
-    │   ├── thumbnailer/     # Raw FFmpeg CLI: Frame extraction
-    │   ├── transcriber/     # OpenAI Whisper: Highly accurate STT
-    │   ├── ai-processor/    # LLMs: Chapters, Summaries, SEO
-    │   ├── dubbing/         # ElevenLabs: Voice cloning & translation
-    │   └── notifications/   # Webhooks & Email dispatcher
-    └── packages/            # Shared internal libraries
-        ├── player/          # Embeddable NPM Video Player (React/Web Component)
-        ├── database/        # Drizzle ORM schemas & migrations
-        ├── auth/            # Better-Auth configuration
-        ├── ui/              # Shadcn/Tailwind components
-        ├── storage/         # AWS S3 / Cloudflare R2 wrappers
-        ├── redis/           # BullMQ/Redis client
-        └── env/             # Zod environment validation
+Every navigation item leads to a working page.
 
-## 3. Frontends & Client Packages
+- **Overview**: first-run checklist (create org, upload, create API key, add webhook) and real counts.
+- **Videos**: folder browser, upload, and a video page with the player, pipeline status, playback IDs, embed snippet, outputs and recent events.
+- **Developers**: API keys, signing keys, webhooks with delivery log and manual retry.
+- **Settings**: team members and invites, organization.
 
-### `@vidcastx/player` (Embeddable NPM Package)
+### Self-hosting and docs
 
-The official, universally compatible video player designed to be installed via NPM and embedded on any external website or web application.
+- One `docker compose up` brings up Postgres, Redis, MinIO, API, transcoder and dashboard with a seeded demo account.
+- `apps/docs` (Fumadocs, fully offline) covers the quickstart, self-hosting, the API, and how each pipeline stage works.
 
-- **Responsibilities:**
-  - Rendering the HLS video streams securely based on environment variables and API keys.
+### Stretch: analytics
 
-  - Silently capturing complex telemetry (buffering rates, seek events, fullscreen toggles, watch duration).
+With time left in V1: the player reports views, watch time, startup time, rebuffering and playback errors, and the video page shows them. This is the first thing cut when time runs short.
 
-  - Transmitting heartbeat and interaction payloads back to the `apps/api` to generate heatmaps and session logs.
+## V1 is done when
 
-### `apps/dashboard` (Creator Studio)
+Every item holds on a fresh clone:
 
-The primary administrative interface for workspace owners and members to manage their video library.
+1. `docker compose up` brings the full stack up healthy; the only manual step is copying `.env.example`.
+2. With an API key, a developer creates an upload, uploads a real phone video (rotated, with audio), receives a signed `video.ready` webhook, and plays it through `<vidcastx-player>` with a signed token in current Chrome, Firefox and Safari.
+3. The same flow works entirely from the dashboard.
+4. `DELETE` removes the video and its files; an expired playback token is rejected.
+5. CI passes typecheck, lint, format, unit tests, build, and an end-to-end smoke test of step 2.
+6. The docs quickstart, self-hosting guide, API reference and pipeline guides match shipped behaviour.
 
-- **Key Components:**
-  - Drag-and-drop Uppy file uploads with chunking support.
+## Beyond V1
 
-  - Media management interface interacting with the hierarchical `folder` structure.
+**Parked** until V1 has launched and shown interest; each needs its own scope decision:
 
-  - Analytics dashboards visualizing views, watch time, and heatmaps.
+- Deployment kits: Terraform for AWS, a Helm chart for Kubernetes.
+- In-process libav transcoder (draft PR #69), per-title encoding, AV1, 4K, chunked parallel encoding (`workers/transcoder/ROADMAP.md`).
+- Captions: uploaded WebVTT tracks first, automatic captions later.
+- MP4 static renditions for download.
+- Live streaming: RTMP ingest, recording to VOD.
+- SDKs beyond TypeScript; a hosted VidcastX cloud.
 
-  - AI Tooling interface for requesting translations or editing generated chapters.
-
-### `apps/marketing`
-
-SEO-optimized public-facing website.
-
-- **Key Components:** Pricing pages, developer API documentation, and feature showcases.
-
-### `apps/api` (Main Backend)
-
-The fast, lightweight core API. **By design, this service never processes video files directly.**
-
-- **Responsibilities:**
-  - Handling authentication and session management via the `@workspace/auth` package.
-
-  - Processing CRUD operations for the Dashboard (fetching libraries, updating metadata).
-
-  - Generating AWS S3 Presigned URLs for secure client-side uploads.
-
-  - Writing to the `ai_job` table and dispatching events to Redis/SQS message brokers.
-
-  - Ingesting high-volume telemetry via the `embed_stats` and `player_event` endpoints from the NPM player.
-
-## 4. The Worker Fleet (`workers/`)
-
-To ensure high availability and prevent the core API from stalling, all heavy computation is offloaded to dedicated workers. **All workers are designed to be fully Dockerized** to run securely and scale horizontally in environments like ECS or Kubernetes.
-
-### `worker-transcoder` (Video Encoding)
-
-- **Execution:** Utilizes Node.js `child_process.spawn()` to execute **raw FFmpeg CLI** commands directly, avoiding fragile Node-FFmpeg abstraction layers.
-
-- **Trigger:** Listens to the `video.uploaded` message queue.
-
-- **Process:**
-  1. Downloads the raw source file from the secure ingestion bucket.
-
-  2. Transcodes the file into adaptive bitrate HLS streams (`.m3u8` playlists).
-
-  3. Extracts the master audio track into a lossless format for the transcriber.
-
-  4. Uploads processed chunks to the public delivery bucket.
-
-  5. Updates the `asset` and `video` database tables (setting `status: 'ready'`).
-
-### `worker-thumbnailer` (Image Extraction)
-
-- **Execution:** Raw FFmpeg CLI.
-
-- **Trigger:** Runs in parallel with the `worker-transcoder`.
-
-- **Process:** Seeks through the video timeline to extract 3-5 optimized JPEG frames. Saves references in the database as `asset_type: 'thumbnail'`.
-
-### `worker-transcriber` (Speech-to-Text)
-
-- **Execution:** OpenAI Whisper API (or equivalent highly-precise model).
-
-- **Trigger:** Triggered upon successful extraction of the audio track by the transcoder.
-
-- **Process:** Feeds the isolated audio to the model to generate exact word-level timings and sentences.
-
-- **Database Updates:** Populates the `transcript` table, setting `is_auto_generated: true` and storing the `word_timings` JSON.
-
-### `worker-ai-processor` (The Intelligence)
-
-- **Execution:** Large Language Models (e.g., GPT-4o).
-
-- **Trigger:** Runs sequentially after `worker-transcriber` completes.
-
-- **Process:** Analyzes the raw transcript text.
-
-- **Outputs:**
-  - **Chapters:** Identifies logical topic transitions and writes to the `video_chapter` table.
-
-  - **Summaries:** Generates multi-length summaries and SEO metadata, saving to the `video_summary` table.
-
-  - **Embeddings:** Generates vector embeddings for semantic search capabilities, saving to the `transcript_embedding` table.
-
-### `worker-dubbing` (Voice Cloning & Translation)
-
-- **Execution:** ElevenLabs API.
-
-- **Trigger:** Triggered manually by a user request or automatically via the `ai_job` table (`type: 'dub'`).
-
-- **Process:**
-  1. Analyzes the isolated audio and original transcript.
-
-  2. Maps original voice characteristics, tone, and pacing.
-
-  3. Generates translated voiceovers matching the original emotional delivery.
-
-  4. Uploads the new audio tracks as alternative language `assets`.
-
-### `worker-notifications` (Event Dispatcher)
-
-- **Execution:** Node.js Webhook & Email Dispatcher.
-
-- **Trigger:** Listens for completed or failed jobs across the system.
-
-- **Process:** Dispatches transactional emails to users and sends JSON payloads to customer endpoints stored in the `webhook` table.
-
-## 5. Database Schema & Architecture Mapping
-
-The system architecture is tightly coupled to the Drizzle PostgreSQL schema. Key mappings include:
-
-### Video & Content Management
-
-- **`video` & `asset`**: The core entities. The `video` table holds metadata and state, while the `asset` table holds the actual CDN links to HLS playlists, thumbnails, and audio tracks.
-
-- **`folder`**: Supports a parent/child tree hierarchy allowing users to organize thousands of videos cleanly.
-
-### Artificial Intelligence (`ai-schema` & `transcript-schema`)
-
-- **`ai_job`**: Tracks the status of asynchronous tasks (`transcribe`, `translate`, `dub`, `generate_metadata`), logging tokens used and precise costs.
-
-- **`transcript` & `video_chapter`**: Stores the structured output of the AI workers.
-
-- **`transcript_embedding`**: Utilizes `pgvector` (1536 dimensions) to allow semantic querying.
-
-### Analytics & Telemetry (`analytics-schema`)
-
-- **`view_session` & `player_event`**: Granular telemetry tracking device types, geographic regions, buffering events, and interaction history automatically fed by the `@vidcastx/player` NPM package.
-
-- **`embed_stats`**: Tracks which external domains (`embed_domain`) are rendering the iframe player.
-
-- **`video_heatmap`**: Tracks re-watches and drop-off points over the video timeline.
-
-### Live Streaming (`live-schema`)
-
-- **`channel` & `stream`**: Manages RTMP ingest endpoints, records peak viewers, and tracks live broadcast duration.
-
-### Organization & Billing (`auth-schema` & `billing-schema`)
-
-- **`organization`, `member`, `invitation`**: Managed via Better-Auth, utilizing a strict soft-delete pattern to maintain data integrity.
-
-- **`usage_record` & `usage_summary`**: Aggregates API requests, encoding minutes, bandwidth, and AI tokens. This table feeds directly into billing meters via the `subscription` and `invoice` tables.
-
-## 6. Infrastructure & Deployment Lifecycle
-
-1. **Upload Phase:** The client requests a presigned URL from the API, then uploads directly to the S3 ingestion bucket. Upon completion, the client notifies the API.
-
-2. **Message Broker:** The API pushes a processing job payload to Redis (BullMQ).
-
-3. **Containerized Processing:** Docker containers running the worker services pick up the jobs, utilizing raw `ffmpeg` installed within the container image for media manipulation.
-
-4. **Delivery:** Processed HLS chunks are moved to a public output S3 bucket, fronted by a global CDN (e.g., Cloudflare or Cloudfront) for low-latency playback.
-
-5. **Telemetry Loop:** The `@vidcastx/player` NPM package embedded on external sites continuously sends lightweight heartbeat events and player interaction data back to the `apps/api` to update the analytics tables in real-time.
+**Dropped** from the product: AI summaries, chapters, dubbing and semantic search; cross-posting to social platforms; billing and usage metering. V1 removes their database schemas.

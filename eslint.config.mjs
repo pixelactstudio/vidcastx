@@ -21,6 +21,7 @@ export default [
       "packages/**",
       "workers/**",
       "tooling/**",
+      ".agents/**",
       "**/.turbo/**",
       "**/dist/**",
       "**/build/**",

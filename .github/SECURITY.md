@@ -10,7 +10,7 @@ VidcastX is pre-1.0. Security fixes target the `main` branch; downstream users a
 
 Preferred channel:
 
-- **GitHub Private Security Advisories:** [Submit a private report](https://github.com/devchaudhary24k/vidcastx/security/advisories/new)
+- **GitHub Private Security Advisories:** [Submit a private report](https://github.com/pixelactstudio/vidcastx/security/advisories/new)
 
 Alternative:
 

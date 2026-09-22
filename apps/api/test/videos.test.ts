@@ -31,7 +31,9 @@ const drizzleStubs = {
   eq: (a: unknown, b: unknown) => ({ a, b }),
   and: (...args: unknown[]) => args,
   asc: (col: unknown) => col,
+  desc: (col: unknown) => col,
   inArray: (col: unknown, vals: unknown[]) => ({ col, vals }),
+  isNull: (col: unknown) => ({ isNull: col }),
 };
 
 void mock.module("@vidcastx/database", () => ({
@@ -51,6 +53,7 @@ void mock.module("drizzle-orm/pg-core", () => ({
 }));
 
 void mock.module("@vidcastx/storage", () => ({
+  getDownloadUrl: (key: string) => Promise.resolve(`https://s3.example.com/${key}`),
   initMultipartUpload: () => Promise.resolve("mock-upload-id"),
   signMultipartPart: () => Promise.resolve("https://s3.example.com/signed-url"),
   completeMultipartUpload: () => Promise.resolve(),
@@ -63,6 +66,10 @@ void mock.module("@vidcastx/database/utils/id", () => ({
 }));
 
 void mock.module("@vidcastx/database/schema/video-schema", () => ({
+  assets: {
+    type: "type",
+    storageKey: "storage_key",
+  },
   videos: {
     id: "id",
     orgId: "org_id",

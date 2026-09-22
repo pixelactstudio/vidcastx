@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { useForm, useStore } from "@tanstack/react-form";
+import { useForm, useSelector } from "@tanstack/react-form";
 import { ArrowRight, Fingerprint } from "lucide-react";
 
 import { Button } from "@vidcastx/ui/components/button";
@@ -42,7 +42,7 @@ export const Step2Organization: React.FC<StepProps> = ({ onComplete }) => {
   });
 
   // Watch orgName to generate identifier and avatar initials
-  const orgName = useStore(form.store, (state) => state.values.orgName);
+  const orgName = useSelector(form.store, (state) => state.values.orgName);
 
   useEffect(() => {
     if (orgName) {

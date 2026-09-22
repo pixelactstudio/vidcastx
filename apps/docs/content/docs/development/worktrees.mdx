@@ -1,0 +1,31 @@
+---
+title: Working with worktrees
+description: Run several branches side by side, each in its own git worktree.
+---
+
+A git worktree is a second checkout of the same repository in another directory. Each worktree has its own branch and working files, and all of them share one `.git` store. Worktrees let you review a PR or run a long task on one branch while you keep editing another.
+
+Each worktree needs its own `.env` files and its own `node_modules`. Two scripts handle that.
+
+## Create a worktree
+
+```bash
+pnpm worktree:new <branch>
+```
+
+This creates a new worktree for `<branch>`, based on `origin/dev`, and then runs the setup below inside it.
+
+## Set up an existing worktree
+
+If you created the worktree yourself with `git worktree add`, run this inside it:
+
+```bash
+pnpm worktree:setup
+```
+
+It copies the env files from the main checkout and installs dependencies.
+
+<Callout title="Ports are shared">
+  Every worktree uses the same default ports (4000, 4001, 4002) and the same Docker services. Stop `pnpm dev` in one
+  worktree before you start it in another.
+</Callout>

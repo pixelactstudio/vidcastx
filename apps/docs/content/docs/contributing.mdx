@@ -1,0 +1,80 @@
+---
+title: Contributing
+description: Branch model, commit format, and the checks a change must pass.
+---
+
+Contributions go through pull requests. The conventions below come from `CLAUDE.md` and `.claude/rules/` at the repository root, which hold the full rule set.
+
+## Branches
+
+- **`dev`** is the integration branch. Every feature and fix lands here through a PR.
+- **`main`** is the release branch. It only moves when `dev` is released.
+- Work happens on short-lived branches cut from a fresh `dev`, named by change type: `feat/<short-name>`, `fix/<short-name>`, `chore/<short-name>`.
+
+```bash
+git fetch origin
+git switch dev
+git pull --ff-only origin dev
+git switch -c feat/<short-name>
+```
+
+On a branch that lives longer than a day, merge `origin/dev` in regularly. If the merge touches `packages/database/src/schema/`, apply the new migrations with `pnpm db:migrate`.
+
+The `pre-push` hook refuses direct pushes to `main`, `dev`, `master` or `develop`, and it also refuses force-pushes. On your own branch, use `--force-with-lease`, never `--force`.
+
+## Commits
+
+Commits follow [Conventional Commits](https://www.conventionalcommits.org/):
+
+```text
+<type>(<optional-scope>): <short imperative summary>
+
+<optional body: why the change is needed>
+```
+
+- **Types**: `feat`, `fix`, `refactor`, `perf`, `docs`, `test`, `chore`, `build`, `ci`, `style`, `revert`
+- **Scope**: the area touched, such as `api`, `app`, `db`, `ui`, `auth` or `docs`
+- **Summary**: imperative, lowercase, no trailing period, at most 72 characters. Example: `feat(videos): add resumable upload retry`.
+
+Keep one logical change per commit. Land a refactor separately from the behavior change it enables. A schema change and its generated migration go in the **same** commit, so every commit builds and runs.
+
+Never commit `.env` files, build output, or debug leftovers (`console.log`, `debugger`, commented-out code).
+
+## Checks
+
+Run these before opening a PR. CI runs the first four on every PR into `main` or `dev`, so they must pass there too.
+
+```bash
+pnpm check-types   # TypeScript, all workspaces
+pnpm lint          # ESLint; zero warnings allowed in every workspace except the dashboard
+pnpm format        # Prettier check (fix with pnpm format:fix)
+pnpm test          # bun test (API) and vitest (dashboard)
+pnpm lint:ws       # sherif: consistent dependency versions across workspaces
+```
+
+The git hooks run part of this automatically:
+
+| Hook                          | What it does                                                                                                        |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `pre-commit`                  | Runs ESLint `--fix` and Prettier on staged files. Blocks the commit if schema files are staged without a migration. |
+| `pre-push`                    | Refuses pushes to protected branches and force-pushes, then runs `pnpm check-types` and `pnpm lint`.                |
+| `post-merge`, `post-checkout` | Reinstall dependencies if the lockfile changed, and warn if the database schema changed.                            |
+
+Don't bypass a hook with `--no-verify`. If a hook fails, fix the cause.
+
+## Pull requests
+
+Open the PR against `dev` and fill in the template (`.github/pull_request_template.md`): a short summary, linked issues, the type of change, the scope, and the checklist. A PR should hold one type of change; if it needs several, split it.
+
+## Code conventions in brief
+
+- No `any`, no non-null assertions, no unchecked `as` casts, no `enum` or `namespace` (`erasableSyntaxOnly` rejects them).
+- Read environment variables only through each workspace's `env.ts`, which validates them with `@t3-oss/env-core` and Zod. Never read `process.env.X` directly.
+- Catch specific errors, log the full error object, and never swallow one.
+- Filenames are kebab-case.
+- The dashboard holds no business logic and never imports backend packages. Lint enforces this.
+- Don't add dependencies without the maintainer's approval.
+
+## Security
+
+Report vulnerabilities privately through GitHub's private vulnerability reporting, or through the contact route in `.github/SECURITY.md`. Never open a public issue for a vulnerability.

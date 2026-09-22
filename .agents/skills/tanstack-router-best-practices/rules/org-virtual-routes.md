@@ -11,14 +11,14 @@ Virtual routes are automatically generated placeholder routes in the route tree 
 ```tsx
 // Creating unnecessary boilerplate main route files
 // routes/settings.tsx - Just to have a file
-export const Route = createFileRoute("/settings")({
+export const Route = createFileRoute('/settings')({
   // Empty - no loader, no beforeLoad, nothing
-});
+})
 
 // routes/settings.lazy.tsx - Actual component
-export const Route = createLazyFileRoute("/settings")({
+export const Route = createLazyFileRoute('/settings')({
   component: SettingsPage,
-});
+})
 
 // The main file is unnecessary boilerplate
 ```
@@ -29,14 +29,14 @@ export const Route = createLazyFileRoute("/settings")({
 // Delete routes/settings.tsx entirely!
 
 // routes/settings.lazy.tsx - Only file needed
-export const Route = createLazyFileRoute("/settings")({
+export const Route = createLazyFileRoute('/settings')({
   component: SettingsPage,
   pendingComponent: SettingsLoading,
   errorComponent: SettingsError,
-});
+})
 
 function SettingsPage() {
-  return <div>Settings Content</div>;
+  return <div>Settings Content</div>
 }
 
 // TanStack Router auto-generates a virtual route:
@@ -50,37 +50,37 @@ function SettingsPage() {
 
 ```tsx
 // routes/dashboard.tsx - Need this for loader/beforeLoad
-export const Route = createFileRoute("/dashboard")({
+export const Route = createFileRoute('/dashboard')({
   beforeLoad: async ({ context }) => {
     if (!context.auth.isAuthenticated) {
-      throw redirect({ to: "/login" });
+      throw redirect({ to: '/login' })
     }
   },
   loader: async ({ context: { queryClient } }) => {
-    await queryClient.ensureQueryData(dashboardQueries.stats());
+    await queryClient.ensureQueryData(dashboardQueries.stats())
   },
   // Component is in lazy file
-});
+})
 
 // routes/dashboard.lazy.tsx
-export const Route = createLazyFileRoute("/dashboard")({
+export const Route = createLazyFileRoute('/dashboard')({
   component: DashboardPage,
   pendingComponent: DashboardSkeleton,
-});
+})
 
 // Main file IS needed here because we have loader/beforeLoad
 ```
 
 ## Decision Guide
 
-| Route Has...                         | Need Main File? | Use Virtual? |
-| ------------------------------------ | --------------- | ------------ |
-| Only component                       | No              | Yes          |
-| loader                               | Yes             | No           |
-| beforeLoad                           | Yes             | No           |
-| validateSearch                       | Yes             | No           |
-| loaderDeps                           | Yes             | No           |
-| Just pendingComponent/errorComponent | No              | Yes          |
+| Route Has... | Need Main File? | Use Virtual? |
+|--------------|-----------------|--------------|
+| Only component | No | Yes |
+| loader | Yes | No |
+| beforeLoad | Yes | No |
+| validateSearch | Yes | No |
+| loaderDeps | Yes | No |
+| Just pendingComponent/errorComponent | No | Yes |
 
 ## Good Example: File Structure with Virtual Routes
 

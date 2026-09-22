@@ -28,16 +28,22 @@ export const FolderSummary = t.Composite([
   }),
 ]);
 
-export const VideoSummary = t.Pick(_videoSelect, [
-  "id",
-  "title",
-  "folderId",
-  "visibility",
-  "pinned",
-  "duration",
-  "status",
-  "createdAt",
-  "updatedAt",
+export const VideoSummary = t.Composite([
+  t.Pick(_videoSelect, [
+    "id",
+    "title",
+    "folderId",
+    "visibility",
+    "pinned",
+    "duration",
+    "status",
+    "createdAt",
+    "updatedAt",
+  ]),
+  t.Object({
+    thumbnailUrl: t.Optional(t.Nullable(t.String())),
+    previewUrl: t.Optional(t.Nullable(t.String())),
+  }),
 ]);
 
 export const BrowseQuery = t.Object({

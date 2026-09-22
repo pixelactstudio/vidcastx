@@ -15,6 +15,7 @@ import { useToggleVideoPin } from "../api/use-toggle-video-pin";
 import { useUpdateFolder } from "../api/use-update-folder";
 import { CreateFolderDialog } from "./create-folder-dialog";
 import { FolderBreadcrumb } from "./folder-breadcrumb";
+import { FolderGridSkeleton } from "./folder-grid-skeleton";
 import { MixedGrid } from "./mixed-grid";
 
 interface FolderBrowserProps {
@@ -111,7 +112,7 @@ export function FolderBrowser({ parentId }: FolderBrowserProps) {
       )}
 
       {isLoading ? (
-        <div className="text-muted-foreground py-16 text-center text-sm">Loading…</div>
+        <FolderGridSkeleton />
       ) : (
         <MixedGrid
           folders={data?.folders ?? []}

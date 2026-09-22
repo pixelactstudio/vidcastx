@@ -1,0 +1,63 @@
+---
+title: Commands
+description: The pnpm scripts defined in the root package.json.
+---
+
+Run these from the repository root. Most scripts hand off to Turbo, which runs the script of the same name in every workspace that defines one, in dependency order.
+
+## Develop
+
+| Command         | What it runs                 | Notes                                                                                                                          |
+| --------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `pnpm dev`      | `turbo dev`                  | Every workspace's `dev` script: API (Bun `--watch`), dashboard (Vite), transcoder (`tsx watch`), Drizzle Studio, and the docs. |
+| `pnpm dev:app`  | `turbo watch dev -F app...`  | The dashboard and the workspaces it depends on.                                                                                |
+| `pnpm dev:api`  | `turbo watch dev -F api...`  | The API and the workspaces it depends on.                                                                                      |
+| `pnpm dev:docs` | `turbo watch dev -F docs...` | This documentation site on port 4002.                                                                                          |
+| `pnpm start`    | `turbo start`                | Each workspace's production `start` script. Run `pnpm build` first.                                                            |
+
+The `...` suffix in `-F app...` means "this workspace and everything it depends on". `turbo watch` reruns tasks when a dependency changes.
+
+To target one workspace directly, use pnpm's filter, for example `pnpm --filter transcoder dev` or `pnpm --filter docs build`.
+
+## Build and verify
+
+| Command            | What it runs                  | Notes                                                                                                                    |
+| ------------------ | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `pnpm build`       | `turbo build`                 | Builds every workspace with a `build` script. Outputs go to `dist/`.                                                     |
+| `pnpm check-types` | `turbo check-types`           | `tsc --noEmit` in every workspace.                                                                                       |
+| `pnpm lint`        | `turbo run lint --continue`   | ESLint 9 with type-aware rules, cached in `.cache/`. Every workspace except the dashboard lints with `--max-warnings 0`. |
+| `pnpm lint:fix`    | the same, with `--fix`        | Applies autofixes, such as removing unused imports.                                                                      |
+| `pnpm format`      | `turbo run format --continue` | `prettier --check` in every workspace.                                                                                   |
+| `pnpm format:fix`  | the same, with `--write`      | Rewrites files in place.                                                                                                 |
+| `pnpm lint:ws`     | `pnpm dlx sherif@latest`      | Checks consistency across workspaces, such as mismatched dependency versions. Also runs after every `pnpm install`.      |
+| `pnpm test`        | `turbo run test`              | `bun test` in the API and `vitest run` in the dashboard.                                                                 |
+
+`--continue` keeps Turbo running after the first failing workspace, so you see every failure in one pass.
+
+## Database
+
+These scripts go through `apps/studio`, which runs `drizzle-kit` inside `packages/database` with the root `.env` loaded.
+
+| Command            | What it runs           | Notes                                          |
+| ------------------ | ---------------------- | ---------------------------------------------- |
+| `pnpm db:generate` | `drizzle-kit generate` | Generates a SQL migration from schema changes. |
+| `pnpm db:migrate`  | `drizzle-kit migrate`  | Applies pending migrations to `DATABASE_URL`.  |
+| `pnpm db:studio`   | `drizzle-kit studio`   | Opens Drizzle Studio to browse the database.   |
+| `pnpm db:push`     | `drizzle-kit push`     | Syncs the schema without a migration file.     |
+
+<Callout type="warn" title="Don't use db:push">
+  `db:push` skips migration history, and environments drift apart as a result. The repository rules forbid it. Change
+  the schema, generate a migration, and commit the migration in the same commit as the schema change. The pre-commit
+  hook blocks commits that stage schema files without a migration.
+</Callout>
+
+## Housekeeping
+
+| Command                 | What it runs                                             | Notes                                                  |
+| ----------------------- | -------------------------------------------------------- | ------------------------------------------------------ |
+| `pnpm clean`            | `git clean -xdf node_modules .turbo`                     | Deletes root `node_modules` and the Turbo cache.       |
+| `pnpm clean:workspaces` | `turbo run clean`                                        | Runs each workspace's `clean` script.                  |
+| `pnpm bump-deps`        | `npx npm-check-updates --deep -i`                        | Interactive dependency upgrades across all workspaces. |
+| `pnpm bump-ui`          | `npx shadcn@canary add --all --overwrite -c packages/ui` | Re-pulls every shadcn component into `packages/ui`.    |
+
+`postinstall` runs `pnpm lint:ws`, and `prepare` installs the Husky git hooks.
