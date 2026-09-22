@@ -31,7 +31,7 @@ export const Route = createFileRoute("/_protected")({
       <div className="flex min-h-screen items-center justify-center">
         <div className="space-y-4 text-center">
           <h1 className="text-2xl font-bold">Something went wrong</h1>
-          <p className="text-muted-foreground">{error.message}</p>
+          <p className="text-muted-foreground">{error instanceof Error ? error.message : "Unexpected error"}</p>
           <button
             onClick={() => {
               void router.invalidate();

@@ -38,5 +38,5 @@
       "cache": false
     }
   },
-  "globalEnv": ["ENVIRONMENT", "PRODUCTION_URL", "DATABASE_URL", "AYYO", "NODE_ENV", "SKIP_ENV_VALIDATION", "API_URL"]
+  "globalEnv": ["DATABASE_URL", "NODE_ENV", "SKIP_ENV_VALIDATION", "API_URL"]
 }
