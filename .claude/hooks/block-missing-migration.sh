@@ -2,7 +2,7 @@
 # PreToolUse hook for Bash.
 # Intercepts `git commit` (including `git commit -m "..."`). If the staged
 # changeset includes files under packages/database/src/schema/ but NO files
-# under packages/database/src/migrations/, refuse the commit.
+# under packages/database/drizzle/, refuse the commit.
 #
 # Rule reference: .claude/rules/database.md, .claude/rules/commit-discipline.md
 # Exit 2 blocks; exit 0 allows.
@@ -37,7 +37,7 @@ migration_added=0
 while IFS= read -r f; do
   case "$f" in
     packages/database/src/schema/*) schema_changed=1 ;;
-    packages/database/src/migrations/*|packages/database/migrations/*) migration_added=1 ;;
+    packages/database/drizzle/*) migration_added=1 ;;
   esac
 done <<< "$staged"
 
