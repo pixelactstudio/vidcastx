@@ -3,11 +3,13 @@
 ## Plugin = Decoupled Elysia Instance
 
 ```ts
-const plugin = new Elysia().decorate("plugin", "hi").get("/plugin", ({ plugin }) => plugin);
+const plugin = new Elysia()
+  .decorate('plugin', 'hi')
+  .get('/plugin', ({ plugin }) => plugin)
 
 const app = new Elysia()
-  .use(plugin) // inherit properties
-  .get("/", ({ plugin }) => plugin);
+  .use(plugin)  // inherit properties
+  .get('/', ({ plugin }) => plugin)
 ```
 
 **Inherits**: state, decorate
@@ -18,15 +20,17 @@ const app = new Elysia()
 Each instance runs independently like microservice. **Must explicitly declare dependencies**.
 
 ```ts
-const auth = new Elysia().decorate("Auth", Auth);
+const auth = new Elysia()
+  .decorate('Auth', Auth)
 
 // ❌ Missing dependency
-const main = new Elysia().get("/", ({ Auth }) => Auth.getProfile());
+const main = new Elysia()
+  .get('/', ({ Auth }) => Auth.getProfile())
 
 // ✅ Declare dependency
 const main = new Elysia()
-  .use(auth) // required for Auth
-  .get("/", ({ Auth }) => Auth.getProfile());
+  .use(auth)  // required for Auth
+  .get('/', ({ Auth }) => Auth.getProfile())
 ```
 
 ## Deduplication
@@ -34,27 +38,25 @@ const main = new Elysia()
 **Every plugin re-executes by default**. Use `name` + optional `seed` to deduplicate:
 
 ```ts
-const ip = new Elysia({ name: "ip" }) // unique identifier
-  .derive({ as: "global" }, ({ server, request }) => ({
-    ip: server?.requestIP(request),
-  }));
+const ip = new Elysia({ name: 'ip' })  // unique identifier
+  .derive({ as: 'global' }, ({ server, request }) => ({
+    ip: server?.requestIP(request)
+  }))
 
-const router1 = new Elysia().use(ip);
-const router2 = new Elysia().use(ip);
-const server = new Elysia().use(router1).use(router2);
+const router1 = new Elysia().use(ip)
+const router2 = new Elysia().use(ip)
+const server = new Elysia().use(router1).use(router2)
 // `ip` only executes once due to deduplication
 ```
 
 ## Global vs Explicit Dependency
 
 **Global plugin** (rare, apply everywhere):
-
 - Doesn't add types - cors, compress, helmet
 - Global lifecycle no instance controls - tracing, logging
 - Examples: OpenAPI docs, OpenTelemetry, logging
 
 **Explicit dependency** (default, recommended):
-
 - Adds types - macro, state, model
 - Business logic instances interact with - Auth, DB
 - Examples: state management, ORM, auth, features
@@ -65,44 +67,52 @@ const server = new Elysia().use(router1).use(router2);
 
 ```ts
 // ❌ NOT inherited by app
-const profile = new Elysia().onBeforeHandle(({ cookie }) => throwIfNotSignIn(cookie)).get("/profile", () => "Hi");
+const profile = new Elysia()
+  .onBeforeHandle(({ cookie }) => throwIfNotSignIn(cookie))
+  .get('/profile', () => 'Hi')
 
-const app = new Elysia().use(profile).patch("/rename", ({ body }) => updateProfile(body)); // No sign-in check
+const app = new Elysia()
+  .use(profile)
+  .patch('/rename', ({ body }) => updateProfile(body))  // No sign-in check
 
 // ✅ Exported to app
 const profile = new Elysia()
-  .onBeforeHandle({ as: "global" }, ({ cookie }) => throwIfNotSignIn(cookie))
-  .get("/profile", () => "Hi");
+  .onBeforeHandle({ as: 'global' }, ({ cookie }) => throwIfNotSignIn(cookie))
+  .get('/profile', () => 'Hi')
 ```
 
 ## Scope Levels
 
 1. **local** (default) - current + descendants only
-2. **scoped** - parent + current + descendants
+2. **scoped** - parent + current + descendants  
 3. **global** - all instances (all parents, current, descendants)
 
 Example with `.onBeforeHandle({ as: 'local' }, ...)`:
 
-| type   | child | current | parent | main |
-| ------ | ----- | ------- | ------ | ---- |
-| local  | ✅    | ✅      | ❌     | ❌   |
-| scoped | ✅    | ✅      | ✅     | ❌   |
-| global | ✅    | ✅      | ✅     | ✅   |
+| type | child | current | parent | main |
+|------|-------|---------|--------|------|
+| local | ✅ | ✅ | ❌ | ❌ |
+| scoped | ✅ | ✅ | ✅ | ❌ |
+| global | ✅ | ✅ | ✅ | ✅ |
 
 ## Config
 
 ```ts
 // Instance factory with config
-const version = (v = 1) => new Elysia().get("/version", v);
+const version = (v = 1) => new Elysia()
+  .get('/version', v)
 
-const app = new Elysia().use(version(1));
+const app = new Elysia()
+  .use(version(1))
 ```
 
 ## Functional Callback (not recommended)
 
 ```ts
 // Harder to handle scope/encapsulation
-const plugin = (app: Elysia) => app.state("counter", 0).get("/plugin", () => "Hi");
+const plugin = (app: Elysia) => app
+  .state('counter', 0)
+  .get('/plugin', () => 'Hi')
 
 // Prefer new instance (better type inference, no perf diff)
 ```
@@ -133,13 +143,11 @@ const plugin = (app: Elysia) => app.state("counter", 0).get("/plugin", () => "Hi
 **3 methods to apply hook to parent**:
 
 1. **Inline as** (single hook):
-
 ```ts
 .derive({ as: 'scoped' }, () => ({ hi: 'ok' }))
 ```
 
 2. **Guard as** (multiple hooks, no derive/resolve):
-
 ```ts
 .guard({
   as: 'scoped',
@@ -149,12 +157,11 @@ const plugin = (app: Elysia) => app.state("counter", 0).get("/plugin", () => "Hi
 ```
 
 3. **Instance as** (all hooks + schema):
-
 ```ts
 const plugin = new Elysia()
-  .derive(() => ({ hi: "ok" }))
-  .get("/child", ({ hi }) => hi)
-  .as("scoped"); // lift scope up
+  .derive(() => ({ hi: 'ok' }))
+  .get('/child', ({ hi }) => hi)
+  .as('scoped')  // lift scope up
 ```
 
 `.as()` lifts scope: local → scoped → global
@@ -166,31 +173,30 @@ const plugin = new Elysia()
 ```ts
 // plugin.ts
 export const loadStatic = async (app: Elysia) => {
-  const files = await loadAllFiles();
-  files.forEach((asset) => app.get(asset, file(asset)));
-  return app;
-};
+  const files = await loadAllFiles()
+  files.forEach((asset) => app.get(asset, file(asset)))
+  return app
+}
 
 // main.ts
-const app = new Elysia().use(loadStatic);
+const app = new Elysia().use(loadStatic)
 ```
 
 **Lazy-load module** (dynamic import):
 
 ```ts
-const app = new Elysia().use(import("./plugin")); // loaded after startup
+const app = new Elysia()
+  .use(import('./plugin'))  // loaded after startup
 ```
 
 **Testing** (wait for modules):
 
 ```ts
-await app.modules; // ensure all deferred/lazy modules loaded
+await app.modules  // ensure all deferred/lazy modules loaded
 ```
 
 ## Notes
-
 [Inference] Based on docs patterns:
-
 - Use inline values for static resources (performance optimization)
 - Group routes by prefix for organization
 - Extend context minimally (separation of concerns)

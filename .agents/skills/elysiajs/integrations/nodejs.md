@@ -1,38 +1,32 @@
 # Node.js Integration
-
 Run Elysia on Node.js
 
 ## What It Is
-
 Runtime adapter to run Elysia on Node.js.
 
 ## Installation
-
 ```bash
 bun add elysia @elysiajs/node
 ```
 
 ## Setup
-
 Apply node adapter:
-
 ```typescript
-import { node } from "@elysiajs/node";
-import { Elysia } from "elysia";
+import { Elysia } from 'elysia'
+import { node } from '@elysiajs/node'
 
-const app = new Elysia({ adapter: node() }).get("/", () => "Hello Elysia").listen(3000);
+const app = new Elysia({ adapter: node() })
+  .get('/', () => 'Hello Elysia')
+  .listen(3000)
 ```
 
 ## Additional Setup (Recommended)
-
 Install `tsx` for hot-reload:
-
 ```bash
 bun add -d tsx @types/node typescript
 ```
 
 Scripts in `package.json`:
-
 ```json
 {
   "scripts": {
@@ -48,13 +42,11 @@ Scripts in `package.json`:
 - **start**: Production server
 
 Create `tsconfig.json`:
-
 ```bash
 tsc --init
 ```
 
 Update strict mode:
-
 ```json
 {
   "compilerOptions": {
@@ -66,9 +58,7 @@ Update strict mode:
 Provides hot-reload + JSX support similar to `bun dev`.
 
 ## pnpm
-
 Manual install:
-
 ```bash
 pnpm add @sinclair/typebox openapi-types
 ```

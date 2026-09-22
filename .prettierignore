@@ -1,0 +1,3 @@
+# Vendored agent skills — installed and updated by `npx skills`, keep byte-identical to upstream
+.agents/
+.claude/skills/

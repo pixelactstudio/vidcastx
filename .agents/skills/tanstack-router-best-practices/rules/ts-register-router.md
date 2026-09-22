@@ -10,18 +10,19 @@ Register your router instance with TypeScript's module declaration to enable typ
 
 ```tsx
 // router.tsx - Missing type registration
+import { createRouter, createRootRoute } from '@tanstack/react-router'
+import { routeTree } from './routeTree.gen'
+
+export const router = createRouter({ routeTree })
+
 // components/Navigation.tsx
-import { createRootRoute, createRouter, useNavigate } from "@tanstack/react-router";
-
-import { routeTree } from "./routeTree.gen";
-
-export const router = createRouter({ routeTree });
+import { useNavigate } from '@tanstack/react-router'
 
 function Navigation() {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
   // TypeScript doesn't know valid routes - no autocomplete or type checking
-  navigate({ to: "/posts/$postId" }); // No error even if route doesn't exist
+  navigate({ to: '/posts/$postId' })  // No error even if route doesn't exist
 }
 ```
 
@@ -29,34 +30,35 @@ function Navigation() {
 
 ```tsx
 // router.tsx
-// components/Navigation.tsx
-import { createRouter, useNavigate } from "@tanstack/react-router";
+import { createRouter } from '@tanstack/react-router'
+import { routeTree } from './routeTree.gen'
 
-import { routeTree } from "./routeTree.gen";
-
-export const router = createRouter({ routeTree });
+export const router = createRouter({ routeTree })
 
 // Register the router instance for type inference
-declare module "@tanstack/react-router" {
+declare module '@tanstack/react-router' {
   interface Register {
-    router: typeof router;
+    router: typeof router
   }
 }
 
+// components/Navigation.tsx
+import { useNavigate } from '@tanstack/react-router'
+
 function Navigation() {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
   // Full type safety - TypeScript knows all valid routes
-  navigate({ to: "/posts/$postId", params: { postId: "123" } });
+  navigate({ to: '/posts/$postId', params: { postId: '123' } })
 
   // Type error if route doesn't exist
-  navigate({ to: "/invalid-route" }); // Error: Type '"/invalid-route"' is not assignable...
+  navigate({ to: '/invalid-route' })  // Error: Type '"/invalid-route"' is not assignable...
 
   // Autocomplete for params
   navigate({
-    to: "/users/$userId/posts/$postId",
-    params: { userId: "1", postId: "2" }, // Both required
-  });
+    to: '/users/$userId/posts/$postId',
+    params: { userId: '1', postId: '2' },  // Both required
+  })
 }
 ```
 
@@ -87,18 +89,17 @@ const data = useLoaderData({ from: '/posts/$postId' })  // Knows loader return t
 ```tsx
 // With file-based routing, routeTree is auto-generated
 // router.tsx
-import { createRouter } from "@tanstack/react-router";
-
-import { routeTree } from "./routeTree.gen"; // Generated file
+import { createRouter } from '@tanstack/react-router'
+import { routeTree } from './routeTree.gen'  // Generated file
 
 export const router = createRouter({
   routeTree,
-  defaultPreload: "intent",
-});
+  defaultPreload: 'intent',
+})
 
-declare module "@tanstack/react-router" {
+declare module '@tanstack/react-router' {
   interface Register {
-    router: typeof router;
+    router: typeof router
   }
 }
 ```
