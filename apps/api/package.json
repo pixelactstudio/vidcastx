@@ -28,7 +28,7 @@
     "@vidcastx/queue": "workspace:^",
     "@vidcastx/redis": "workspace:^",
     "@vidcastx/storage": "workspace:^",
-    "better-auth": "^1.5.3",
+    "better-auth": "^1.6.23",
     "drizzle-typebox": "^0.1.1",
     "elysia": "latest",
     "jose": "^6.2.1",

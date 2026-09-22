@@ -1,11 +1,11 @@
 blank_issues_enabled: false
 contact_links:
   - name: 💬 Ask a question
-    url: https://github.com/devchaudhary24k/vidcastx/discussions
+    url: https://github.com/pixelactstudio/vidcastx/discussions
     about: Questions, usage help, design discussions.
   - name: 💡 Feature request / idea
-    url: https://github.com/devchaudhary24k/vidcastx/discussions/new?category=ideas
+    url: https://github.com/pixelactstudio/vidcastx/discussions/new?category=ideas
     about: Propose a new feature — goes to Discussions first; promoted to an issue once scoped.
   - name: 🔒 Report a vulnerability
-    url: https://github.com/devchaudhary24k/vidcastx/security/advisories/new
+    url: https://github.com/pixelactstudio/vidcastx/security/advisories/new
     about: Privately disclose a security issue. See SECURITY.md.

@@ -5,15 +5,14 @@
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*", "!**/*.stories.{tsx,jsx,mdx}"],
-      "outputs": [
-        ".next/**",
-        "!.next/cache/**",
-        "dist/**",
-        "storybook-static/**"
-      ]
+      "outputs": [".next/**", "!.next/cache/**", "dist/**", "storybook-static/**"]
     },
     "start": {
       "dependsOn": ["^build"]
+    },
+
+    "test": {
+      "cache": false
     },
 
     "check-types": {
@@ -39,13 +38,5 @@
       "cache": false
     }
   },
-  "globalEnv": [
-    "ENVIRONMENT",
-    "PRODUCTION_URL",
-    "DATABASE_URL",
-    "AYYO",
-    "NODE_ENV",
-    "SKIP_ENV_VALIDATION",
-    "API_URL"
-  ]
+  "globalEnv": ["ENVIRONMENT", "PRODUCTION_URL", "DATABASE_URL", "AYYO", "NODE_ENV", "SKIP_ENV_VALIDATION", "API_URL"]
 }

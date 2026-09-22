@@ -1,4 +1,13 @@
-# VidcastX - Architecture & Project Scope
+# VidcastX — Product Vision and Target Architecture
+
+> [!IMPORTANT]
+> This document preserves the intended product direction. It is not a claim that every section is implemented, integrated, or production-ready. See `README.md` for the current repository reality and `TODO.md` for the grounded work queue.
+
+## Current implementation boundary
+
+The checked-in repository currently has one TanStack Start application (`apps/app`), one Elysia API (`apps/api`), shared internal packages, and one FFmpeg transcoder worker. The names and services below—such as `apps/dashboard`, `apps/marketing`, `@vidcastx/player`, the AI worker fleet, live-streaming services, billing, and webhook delivery—describe target capabilities unless the current README explicitly marks them as implemented.
+
+The remainder of this file intentionally keeps the original product and architecture ideas intact.
 
 VidcastX is an enterprise-grade, B2B video hosting, streaming, and AI-processing platform. Unlike consumer-oriented platforms, VidcastX is designed specifically for creators, businesses, and developers to host, transcode, analyze, and distribute their video content globally via embeddable players and robust APIs.
 

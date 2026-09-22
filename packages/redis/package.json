@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "@t3-oss/env-core": "^0.13.10",
-    "ioredis": "^5.10.0",
+    "ioredis": "5.10.0",
     "zod": "^4.3.6"
   }
 }

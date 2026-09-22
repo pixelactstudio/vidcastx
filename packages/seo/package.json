@@ -28,7 +28,7 @@
   "dependencies": {
     "@t3-oss/env-core": "^0.13.10",
     "lodash.merge": "^4.6.2",
-    "next": "16.2.3",
+    "next": "16.2.6",
     "react": "19.2.4",
     "schema-dts": "^1.1.5",
     "zod": "^4.3.6"

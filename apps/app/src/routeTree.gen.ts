@@ -8,685 +8,659 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from './routes/__root'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as ProtectedRouteImport } from './routes/_protected'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthSignupRouteImport } from './routes/auth/signup'
-import { Route as AuthLoginRouteImport } from './routes/auth/login'
-import { Route as ProtectedOnboardingRouteImport } from './routes/_protected/onboarding'
-import { Route as ProtectedDashboardRouteImport } from './routes/_protected/dashboard'
-import { Route as ProtectedDashboardIndexRouteImport } from './routes/_protected/dashboard/index'
-import { Route as ProtectedDashboardTeamIndexRouteImport } from './routes/_protected/dashboard/team/index'
-import { Route as ProtectedDashboardStudioIndexRouteImport } from './routes/_protected/dashboard/studio/index'
-import { Route as ProtectedDashboardProjectsIndexRouteImport } from './routes/_protected/dashboard/projects/index'
-import { Route as ProtectedDashboardIntegrationsIndexRouteImport } from './routes/_protected/dashboard/integrations/index'
-import { Route as ProtectedDashboardDevelopersIndexRouteImport } from './routes/_protected/dashboard/developers/index'
-import { Route as ProtectedDashboardBillingIndexRouteImport } from './routes/_protected/dashboard/billing/index'
-import { Route as ProtectedDashboardAssetsIndexRouteImport } from './routes/_protected/dashboard/assets/index'
-import { Route as ProtectedDashboardAnalyticsIndexRouteImport } from './routes/_protected/dashboard/analytics/index'
-import { Route as ProtectedDashboardVideosVideoIdRouteImport } from './routes/_protected/dashboard/videos/$videoId'
-import { Route as ProtectedDashboardTeamRolesRouteImport } from './routes/_protected/dashboard/team/roles'
-import { Route as ProtectedDashboardTeamMembersRouteImport } from './routes/_protected/dashboard/team/members'
-import { Route as ProtectedDashboardStudioNewRouteImport } from './routes/_protected/dashboard/studio/new'
-import { Route as ProtectedDashboardStudioEditorRouteImport } from './routes/_protected/dashboard/studio/editor'
-import { Route as ProtectedDashboardIntegrationsWebhooksRouteImport } from './routes/_protected/dashboard/integrations/webhooks'
-import { Route as ProtectedDashboardIntegrationsAppsRouteImport } from './routes/_protected/dashboard/integrations/apps'
-import { Route as ProtectedDashboardDevelopersDocsRouteImport } from './routes/_protected/dashboard/developers/docs'
-import { Route as ProtectedDashboardDevelopersApiKeysRouteImport } from './routes/_protected/dashboard/developers/api-keys'
-import { Route as ProtectedDashboardBillingSubscriptionRouteImport } from './routes/_protected/dashboard/billing/subscription'
-import { Route as ProtectedDashboardBillingInvoicesRouteImport } from './routes/_protected/dashboard/billing/invoices'
-import { Route as ProtectedDashboardAssetsTrashRouteImport } from './routes/_protected/dashboard/assets/trash'
-import { Route as ProtectedDashboardAssetsExportsRouteImport } from './routes/_protected/dashboard/assets/exports'
-import { Route as ProtectedDashboardAnalyticsReportsRouteImport } from './routes/_protected/dashboard/analytics/reports'
-import { Route as ProtectedDashboardProjectsFFolderIdRouteImport } from './routes/_protected/dashboard/projects/f/$folderId'
+import type { createStart } from "@tanstack/react-start";
 
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProtectedRoute = ProtectedRouteImport.update({
-  id: '/_protected',
-  getParentRoute: () => rootRouteImport,
-} as any)
+import type { getRouter } from "./router.tsx";
+import { Route as rootRouteImport } from "./routes/__root";
+import { Route as ProtectedRouteImport } from "./routes/_protected";
+import { Route as ProtectedDashboardRouteImport } from "./routes/_protected/dashboard";
+import { Route as ProtectedDashboardAnalyticsIndexRouteImport } from "./routes/_protected/dashboard/analytics/index";
+import { Route as ProtectedDashboardAnalyticsReportsRouteImport } from "./routes/_protected/dashboard/analytics/reports";
+import { Route as ProtectedDashboardAssetsExportsRouteImport } from "./routes/_protected/dashboard/assets/exports";
+import { Route as ProtectedDashboardAssetsIndexRouteImport } from "./routes/_protected/dashboard/assets/index";
+import { Route as ProtectedDashboardAssetsTrashRouteImport } from "./routes/_protected/dashboard/assets/trash";
+import { Route as ProtectedDashboardBillingIndexRouteImport } from "./routes/_protected/dashboard/billing/index";
+import { Route as ProtectedDashboardBillingInvoicesRouteImport } from "./routes/_protected/dashboard/billing/invoices";
+import { Route as ProtectedDashboardBillingSubscriptionRouteImport } from "./routes/_protected/dashboard/billing/subscription";
+import { Route as ProtectedDashboardDevelopersApiKeysRouteImport } from "./routes/_protected/dashboard/developers/api-keys";
+import { Route as ProtectedDashboardDevelopersDocsRouteImport } from "./routes/_protected/dashboard/developers/docs";
+import { Route as ProtectedDashboardDevelopersIndexRouteImport } from "./routes/_protected/dashboard/developers/index";
+import { Route as ProtectedDashboardIndexRouteImport } from "./routes/_protected/dashboard/index";
+import { Route as ProtectedDashboardIntegrationsAppsRouteImport } from "./routes/_protected/dashboard/integrations/apps";
+import { Route as ProtectedDashboardIntegrationsIndexRouteImport } from "./routes/_protected/dashboard/integrations/index";
+import { Route as ProtectedDashboardIntegrationsWebhooksRouteImport } from "./routes/_protected/dashboard/integrations/webhooks";
+import { Route as ProtectedDashboardProjectsFFolderIdRouteImport } from "./routes/_protected/dashboard/projects/f/$folderId";
+import { Route as ProtectedDashboardProjectsIndexRouteImport } from "./routes/_protected/dashboard/projects/index";
+import { Route as ProtectedDashboardStudioEditorRouteImport } from "./routes/_protected/dashboard/studio/editor";
+import { Route as ProtectedDashboardStudioIndexRouteImport } from "./routes/_protected/dashboard/studio/index";
+import { Route as ProtectedDashboardStudioNewRouteImport } from "./routes/_protected/dashboard/studio/new";
+import { Route as ProtectedDashboardTeamIndexRouteImport } from "./routes/_protected/dashboard/team/index";
+import { Route as ProtectedDashboardTeamMembersRouteImport } from "./routes/_protected/dashboard/team/members";
+import { Route as ProtectedDashboardTeamRolesRouteImport } from "./routes/_protected/dashboard/team/roles";
+import { Route as ProtectedDashboardVideosVideoIdRouteImport } from "./routes/_protected/dashboard/videos/$videoId";
+import { Route as ProtectedOnboardingRouteImport } from "./routes/_protected/onboarding";
+import { Route as AuthRouteImport } from "./routes/auth";
+import { Route as AuthLoginRouteImport } from "./routes/auth/login";
+import { Route as AuthSignupRouteImport } from "./routes/auth/signup";
+import { Route as IndexRouteImport } from "./routes/index";
+
 const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+  id: "/",
+  path: "/",
   getParentRoute: () => rootRouteImport,
-} as any)
-const AuthSignupRoute = AuthSignupRouteImport.update({
-  id: '/signup',
-  path: '/signup',
-  getParentRoute: () => AuthRoute,
-} as any)
-const AuthLoginRoute = AuthLoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => AuthRoute,
-} as any)
-const ProtectedOnboardingRoute = ProtectedOnboardingRouteImport.update({
-  id: '/onboarding',
-  path: '/onboarding',
-  getParentRoute: () => ProtectedRoute,
-} as any)
+} as any);
+const ProtectedRoute = ProtectedRouteImport.update({
+  id: "/_protected",
+  getParentRoute: () => rootRouteImport,
+} as any);
+const AuthRoute = AuthRouteImport.update({
+  id: "/auth",
+  path: "/auth",
+  getParentRoute: () => rootRouteImport,
+} as any);
 const ProtectedDashboardRoute = ProtectedDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
+  id: "/dashboard",
+  path: "/dashboard",
   getParentRoute: () => ProtectedRoute,
-} as any)
+} as any);
+const ProtectedOnboardingRoute = ProtectedOnboardingRouteImport.update({
+  id: "/onboarding",
+  path: "/onboarding",
+  getParentRoute: () => ProtectedRoute,
+} as any);
+const AuthLoginRoute = AuthLoginRouteImport.update({
+  id: "/login",
+  path: "/login",
+  getParentRoute: () => AuthRoute,
+} as any);
+const AuthSignupRoute = AuthSignupRouteImport.update({
+  id: "/signup",
+  path: "/signup",
+  getParentRoute: () => AuthRoute,
+} as any);
 const ProtectedDashboardIndexRoute = ProtectedDashboardIndexRouteImport.update({
-  id: '/',
-  path: '/',
+  id: "/",
+  path: "/",
   getParentRoute: () => ProtectedDashboardRoute,
-} as any)
-const ProtectedDashboardTeamIndexRoute =
-  ProtectedDashboardTeamIndexRouteImport.update({
-    id: '/team/',
-    path: '/team/',
-    getParentRoute: () => ProtectedDashboardRoute,
-  } as any)
-const ProtectedDashboardStudioIndexRoute =
-  ProtectedDashboardStudioIndexRouteImport.update({
-    id: '/studio/',
-    path: '/studio/',
-    getParentRoute: () => ProtectedDashboardRoute,
-  } as any)
-const ProtectedDashboardProjectsIndexRoute =
-  ProtectedDashboardProjectsIndexRouteImport.update({
-    id: '/projects/',
-    path: '/projects/',
-    getParentRoute: () => ProtectedDashboardRoute,
-  } as any)
-const ProtectedDashboardIntegrationsIndexRoute =
-  ProtectedDashboardIntegrationsIndexRouteImport.update({
-    id: '/integrations/',
-    path: '/integrations/',
-    getParentRoute: () => ProtectedDashboardRoute,
-  } as any)
-const ProtectedDashboardDevelopersIndexRoute =
-  ProtectedDashboardDevelopersIndexRouteImport.update({
-    id: '/developers/',
-    path: '/developers/',
-    getParentRoute: () => ProtectedDashboardRoute,
-  } as any)
-const ProtectedDashboardBillingIndexRoute =
-  ProtectedDashboardBillingIndexRouteImport.update({
-    id: '/billing/',
-    path: '/billing/',
-    getParentRoute: () => ProtectedDashboardRoute,
-  } as any)
-const ProtectedDashboardAssetsIndexRoute =
-  ProtectedDashboardAssetsIndexRouteImport.update({
-    id: '/assets/',
-    path: '/assets/',
-    getParentRoute: () => ProtectedDashboardRoute,
-  } as any)
-const ProtectedDashboardAnalyticsIndexRoute =
-  ProtectedDashboardAnalyticsIndexRouteImport.update({
-    id: '/analytics/',
-    path: '/analytics/',
-    getParentRoute: () => ProtectedDashboardRoute,
-  } as any)
-const ProtectedDashboardVideosVideoIdRoute =
-  ProtectedDashboardVideosVideoIdRouteImport.update({
-    id: '/videos/$videoId',
-    path: '/videos/$videoId',
-    getParentRoute: () => ProtectedDashboardRoute,
-  } as any)
-const ProtectedDashboardTeamRolesRoute =
-  ProtectedDashboardTeamRolesRouteImport.update({
-    id: '/team/roles',
-    path: '/team/roles',
-    getParentRoute: () => ProtectedDashboardRoute,
-  } as any)
-const ProtectedDashboardTeamMembersRoute =
-  ProtectedDashboardTeamMembersRouteImport.update({
-    id: '/team/members',
-    path: '/team/members',
-    getParentRoute: () => ProtectedDashboardRoute,
-  } as any)
-const ProtectedDashboardStudioNewRoute =
-  ProtectedDashboardStudioNewRouteImport.update({
-    id: '/studio/new',
-    path: '/studio/new',
-    getParentRoute: () => ProtectedDashboardRoute,
-  } as any)
-const ProtectedDashboardStudioEditorRoute =
-  ProtectedDashboardStudioEditorRouteImport.update({
-    id: '/studio/editor',
-    path: '/studio/editor',
-    getParentRoute: () => ProtectedDashboardRoute,
-  } as any)
-const ProtectedDashboardIntegrationsWebhooksRoute =
-  ProtectedDashboardIntegrationsWebhooksRouteImport.update({
-    id: '/integrations/webhooks',
-    path: '/integrations/webhooks',
-    getParentRoute: () => ProtectedDashboardRoute,
-  } as any)
-const ProtectedDashboardIntegrationsAppsRoute =
-  ProtectedDashboardIntegrationsAppsRouteImport.update({
-    id: '/integrations/apps',
-    path: '/integrations/apps',
-    getParentRoute: () => ProtectedDashboardRoute,
-  } as any)
-const ProtectedDashboardDevelopersDocsRoute =
-  ProtectedDashboardDevelopersDocsRouteImport.update({
-    id: '/developers/docs',
-    path: '/developers/docs',
-    getParentRoute: () => ProtectedDashboardRoute,
-  } as any)
-const ProtectedDashboardDevelopersApiKeysRoute =
-  ProtectedDashboardDevelopersApiKeysRouteImport.update({
-    id: '/developers/api-keys',
-    path: '/developers/api-keys',
-    getParentRoute: () => ProtectedDashboardRoute,
-  } as any)
-const ProtectedDashboardBillingSubscriptionRoute =
-  ProtectedDashboardBillingSubscriptionRouteImport.update({
-    id: '/billing/subscription',
-    path: '/billing/subscription',
-    getParentRoute: () => ProtectedDashboardRoute,
-  } as any)
-const ProtectedDashboardBillingInvoicesRoute =
-  ProtectedDashboardBillingInvoicesRouteImport.update({
-    id: '/billing/invoices',
-    path: '/billing/invoices',
-    getParentRoute: () => ProtectedDashboardRoute,
-  } as any)
-const ProtectedDashboardAssetsTrashRoute =
-  ProtectedDashboardAssetsTrashRouteImport.update({
-    id: '/assets/trash',
-    path: '/assets/trash',
-    getParentRoute: () => ProtectedDashboardRoute,
-  } as any)
-const ProtectedDashboardAssetsExportsRoute =
-  ProtectedDashboardAssetsExportsRouteImport.update({
-    id: '/assets/exports',
-    path: '/assets/exports',
-    getParentRoute: () => ProtectedDashboardRoute,
-  } as any)
-const ProtectedDashboardAnalyticsReportsRoute =
-  ProtectedDashboardAnalyticsReportsRouteImport.update({
-    id: '/analytics/reports',
-    path: '/analytics/reports',
-    getParentRoute: () => ProtectedDashboardRoute,
-  } as any)
-const ProtectedDashboardProjectsFFolderIdRoute =
-  ProtectedDashboardProjectsFFolderIdRouteImport.update({
-    id: '/projects/f/$folderId',
-    path: '/projects/f/$folderId',
-    getParentRoute: () => ProtectedDashboardRoute,
-  } as any)
+} as any);
+const ProtectedDashboardAnalyticsIndexRoute = ProtectedDashboardAnalyticsIndexRouteImport.update({
+  id: "/analytics/",
+  path: "/analytics/",
+  getParentRoute: () => ProtectedDashboardRoute,
+} as any);
+const ProtectedDashboardAnalyticsReportsRoute = ProtectedDashboardAnalyticsReportsRouteImport.update({
+  id: "/analytics/reports",
+  path: "/analytics/reports",
+  getParentRoute: () => ProtectedDashboardRoute,
+} as any);
+const ProtectedDashboardAssetsIndexRoute = ProtectedDashboardAssetsIndexRouteImport.update({
+  id: "/assets/",
+  path: "/assets/",
+  getParentRoute: () => ProtectedDashboardRoute,
+} as any);
+const ProtectedDashboardAssetsExportsRoute = ProtectedDashboardAssetsExportsRouteImport.update({
+  id: "/assets/exports",
+  path: "/assets/exports",
+  getParentRoute: () => ProtectedDashboardRoute,
+} as any);
+const ProtectedDashboardAssetsTrashRoute = ProtectedDashboardAssetsTrashRouteImport.update({
+  id: "/assets/trash",
+  path: "/assets/trash",
+  getParentRoute: () => ProtectedDashboardRoute,
+} as any);
+const ProtectedDashboardBillingIndexRoute = ProtectedDashboardBillingIndexRouteImport.update({
+  id: "/billing/",
+  path: "/billing/",
+  getParentRoute: () => ProtectedDashboardRoute,
+} as any);
+const ProtectedDashboardBillingInvoicesRoute = ProtectedDashboardBillingInvoicesRouteImport.update({
+  id: "/billing/invoices",
+  path: "/billing/invoices",
+  getParentRoute: () => ProtectedDashboardRoute,
+} as any);
+const ProtectedDashboardBillingSubscriptionRoute = ProtectedDashboardBillingSubscriptionRouteImport.update({
+  id: "/billing/subscription",
+  path: "/billing/subscription",
+  getParentRoute: () => ProtectedDashboardRoute,
+} as any);
+const ProtectedDashboardDevelopersIndexRoute = ProtectedDashboardDevelopersIndexRouteImport.update({
+  id: "/developers/",
+  path: "/developers/",
+  getParentRoute: () => ProtectedDashboardRoute,
+} as any);
+const ProtectedDashboardDevelopersApiKeysRoute = ProtectedDashboardDevelopersApiKeysRouteImport.update({
+  id: "/developers/api-keys",
+  path: "/developers/api-keys",
+  getParentRoute: () => ProtectedDashboardRoute,
+} as any);
+const ProtectedDashboardDevelopersDocsRoute = ProtectedDashboardDevelopersDocsRouteImport.update({
+  id: "/developers/docs",
+  path: "/developers/docs",
+  getParentRoute: () => ProtectedDashboardRoute,
+} as any);
+const ProtectedDashboardIntegrationsIndexRoute = ProtectedDashboardIntegrationsIndexRouteImport.update({
+  id: "/integrations/",
+  path: "/integrations/",
+  getParentRoute: () => ProtectedDashboardRoute,
+} as any);
+const ProtectedDashboardIntegrationsAppsRoute = ProtectedDashboardIntegrationsAppsRouteImport.update({
+  id: "/integrations/apps",
+  path: "/integrations/apps",
+  getParentRoute: () => ProtectedDashboardRoute,
+} as any);
+const ProtectedDashboardIntegrationsWebhooksRoute = ProtectedDashboardIntegrationsWebhooksRouteImport.update({
+  id: "/integrations/webhooks",
+  path: "/integrations/webhooks",
+  getParentRoute: () => ProtectedDashboardRoute,
+} as any);
+const ProtectedDashboardProjectsIndexRoute = ProtectedDashboardProjectsIndexRouteImport.update({
+  id: "/projects/",
+  path: "/projects/",
+  getParentRoute: () => ProtectedDashboardRoute,
+} as any);
+const ProtectedDashboardStudioIndexRoute = ProtectedDashboardStudioIndexRouteImport.update({
+  id: "/studio/",
+  path: "/studio/",
+  getParentRoute: () => ProtectedDashboardRoute,
+} as any);
+const ProtectedDashboardStudioEditorRoute = ProtectedDashboardStudioEditorRouteImport.update({
+  id: "/studio/editor",
+  path: "/studio/editor",
+  getParentRoute: () => ProtectedDashboardRoute,
+} as any);
+const ProtectedDashboardStudioNewRoute = ProtectedDashboardStudioNewRouteImport.update({
+  id: "/studio/new",
+  path: "/studio/new",
+  getParentRoute: () => ProtectedDashboardRoute,
+} as any);
+const ProtectedDashboardTeamIndexRoute = ProtectedDashboardTeamIndexRouteImport.update({
+  id: "/team/",
+  path: "/team/",
+  getParentRoute: () => ProtectedDashboardRoute,
+} as any);
+const ProtectedDashboardTeamMembersRoute = ProtectedDashboardTeamMembersRouteImport.update({
+  id: "/team/members",
+  path: "/team/members",
+  getParentRoute: () => ProtectedDashboardRoute,
+} as any);
+const ProtectedDashboardTeamRolesRoute = ProtectedDashboardTeamRolesRouteImport.update({
+  id: "/team/roles",
+  path: "/team/roles",
+  getParentRoute: () => ProtectedDashboardRoute,
+} as any);
+const ProtectedDashboardVideosVideoIdRoute = ProtectedDashboardVideosVideoIdRouteImport.update({
+  id: "/videos/$videoId",
+  path: "/videos/$videoId",
+  getParentRoute: () => ProtectedDashboardRoute,
+} as any);
+const ProtectedDashboardProjectsFFolderIdRoute = ProtectedDashboardProjectsFFolderIdRouteImport.update({
+  id: "/projects/f/$folderId",
+  path: "/projects/f/$folderId",
+  getParentRoute: () => ProtectedDashboardRoute,
+} as any);
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/auth': typeof AuthRouteWithChildren
-  '/dashboard': typeof ProtectedDashboardRouteWithChildren
-  '/onboarding': typeof ProtectedOnboardingRoute
-  '/auth/login': typeof AuthLoginRoute
-  '/auth/signup': typeof AuthSignupRoute
-  '/dashboard/': typeof ProtectedDashboardIndexRoute
-  '/dashboard/analytics/reports': typeof ProtectedDashboardAnalyticsReportsRoute
-  '/dashboard/assets/exports': typeof ProtectedDashboardAssetsExportsRoute
-  '/dashboard/assets/trash': typeof ProtectedDashboardAssetsTrashRoute
-  '/dashboard/billing/invoices': typeof ProtectedDashboardBillingInvoicesRoute
-  '/dashboard/billing/subscription': typeof ProtectedDashboardBillingSubscriptionRoute
-  '/dashboard/developers/api-keys': typeof ProtectedDashboardDevelopersApiKeysRoute
-  '/dashboard/developers/docs': typeof ProtectedDashboardDevelopersDocsRoute
-  '/dashboard/integrations/apps': typeof ProtectedDashboardIntegrationsAppsRoute
-  '/dashboard/integrations/webhooks': typeof ProtectedDashboardIntegrationsWebhooksRoute
-  '/dashboard/studio/editor': typeof ProtectedDashboardStudioEditorRoute
-  '/dashboard/studio/new': typeof ProtectedDashboardStudioNewRoute
-  '/dashboard/team/members': typeof ProtectedDashboardTeamMembersRoute
-  '/dashboard/team/roles': typeof ProtectedDashboardTeamRolesRoute
-  '/dashboard/videos/$videoId': typeof ProtectedDashboardVideosVideoIdRoute
-  '/dashboard/analytics/': typeof ProtectedDashboardAnalyticsIndexRoute
-  '/dashboard/assets/': typeof ProtectedDashboardAssetsIndexRoute
-  '/dashboard/billing/': typeof ProtectedDashboardBillingIndexRoute
-  '/dashboard/developers/': typeof ProtectedDashboardDevelopersIndexRoute
-  '/dashboard/integrations/': typeof ProtectedDashboardIntegrationsIndexRoute
-  '/dashboard/projects/': typeof ProtectedDashboardProjectsIndexRoute
-  '/dashboard/studio/': typeof ProtectedDashboardStudioIndexRoute
-  '/dashboard/team/': typeof ProtectedDashboardTeamIndexRoute
-  '/dashboard/projects/f/$folderId': typeof ProtectedDashboardProjectsFFolderIdRoute
+  "/": typeof IndexRoute;
+  "/auth": typeof AuthRouteWithChildren;
+  "/dashboard": typeof ProtectedDashboardRouteWithChildren;
+  "/onboarding": typeof ProtectedOnboardingRoute;
+  "/auth/login": typeof AuthLoginRoute;
+  "/auth/signup": typeof AuthSignupRoute;
+  "/dashboard/": typeof ProtectedDashboardIndexRoute;
+  "/dashboard/analytics/reports": typeof ProtectedDashboardAnalyticsReportsRoute;
+  "/dashboard/assets/exports": typeof ProtectedDashboardAssetsExportsRoute;
+  "/dashboard/assets/trash": typeof ProtectedDashboardAssetsTrashRoute;
+  "/dashboard/billing/invoices": typeof ProtectedDashboardBillingInvoicesRoute;
+  "/dashboard/billing/subscription": typeof ProtectedDashboardBillingSubscriptionRoute;
+  "/dashboard/developers/api-keys": typeof ProtectedDashboardDevelopersApiKeysRoute;
+  "/dashboard/developers/docs": typeof ProtectedDashboardDevelopersDocsRoute;
+  "/dashboard/integrations/apps": typeof ProtectedDashboardIntegrationsAppsRoute;
+  "/dashboard/integrations/webhooks": typeof ProtectedDashboardIntegrationsWebhooksRoute;
+  "/dashboard/studio/editor": typeof ProtectedDashboardStudioEditorRoute;
+  "/dashboard/studio/new": typeof ProtectedDashboardStudioNewRoute;
+  "/dashboard/team/members": typeof ProtectedDashboardTeamMembersRoute;
+  "/dashboard/team/roles": typeof ProtectedDashboardTeamRolesRoute;
+  "/dashboard/videos/$videoId": typeof ProtectedDashboardVideosVideoIdRoute;
+  "/dashboard/analytics/": typeof ProtectedDashboardAnalyticsIndexRoute;
+  "/dashboard/assets/": typeof ProtectedDashboardAssetsIndexRoute;
+  "/dashboard/billing/": typeof ProtectedDashboardBillingIndexRoute;
+  "/dashboard/developers/": typeof ProtectedDashboardDevelopersIndexRoute;
+  "/dashboard/integrations/": typeof ProtectedDashboardIntegrationsIndexRoute;
+  "/dashboard/projects/": typeof ProtectedDashboardProjectsIndexRoute;
+  "/dashboard/studio/": typeof ProtectedDashboardStudioIndexRoute;
+  "/dashboard/team/": typeof ProtectedDashboardTeamIndexRoute;
+  "/dashboard/projects/f/$folderId": typeof ProtectedDashboardProjectsFFolderIdRoute;
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/auth': typeof AuthRouteWithChildren
-  '/onboarding': typeof ProtectedOnboardingRoute
-  '/auth/login': typeof AuthLoginRoute
-  '/auth/signup': typeof AuthSignupRoute
-  '/dashboard': typeof ProtectedDashboardIndexRoute
-  '/dashboard/analytics/reports': typeof ProtectedDashboardAnalyticsReportsRoute
-  '/dashboard/assets/exports': typeof ProtectedDashboardAssetsExportsRoute
-  '/dashboard/assets/trash': typeof ProtectedDashboardAssetsTrashRoute
-  '/dashboard/billing/invoices': typeof ProtectedDashboardBillingInvoicesRoute
-  '/dashboard/billing/subscription': typeof ProtectedDashboardBillingSubscriptionRoute
-  '/dashboard/developers/api-keys': typeof ProtectedDashboardDevelopersApiKeysRoute
-  '/dashboard/developers/docs': typeof ProtectedDashboardDevelopersDocsRoute
-  '/dashboard/integrations/apps': typeof ProtectedDashboardIntegrationsAppsRoute
-  '/dashboard/integrations/webhooks': typeof ProtectedDashboardIntegrationsWebhooksRoute
-  '/dashboard/studio/editor': typeof ProtectedDashboardStudioEditorRoute
-  '/dashboard/studio/new': typeof ProtectedDashboardStudioNewRoute
-  '/dashboard/team/members': typeof ProtectedDashboardTeamMembersRoute
-  '/dashboard/team/roles': typeof ProtectedDashboardTeamRolesRoute
-  '/dashboard/videos/$videoId': typeof ProtectedDashboardVideosVideoIdRoute
-  '/dashboard/analytics': typeof ProtectedDashboardAnalyticsIndexRoute
-  '/dashboard/assets': typeof ProtectedDashboardAssetsIndexRoute
-  '/dashboard/billing': typeof ProtectedDashboardBillingIndexRoute
-  '/dashboard/developers': typeof ProtectedDashboardDevelopersIndexRoute
-  '/dashboard/integrations': typeof ProtectedDashboardIntegrationsIndexRoute
-  '/dashboard/projects': typeof ProtectedDashboardProjectsIndexRoute
-  '/dashboard/studio': typeof ProtectedDashboardStudioIndexRoute
-  '/dashboard/team': typeof ProtectedDashboardTeamIndexRoute
-  '/dashboard/projects/f/$folderId': typeof ProtectedDashboardProjectsFFolderIdRoute
+  "/": typeof IndexRoute;
+  "/auth": typeof AuthRouteWithChildren;
+  "/onboarding": typeof ProtectedOnboardingRoute;
+  "/auth/login": typeof AuthLoginRoute;
+  "/auth/signup": typeof AuthSignupRoute;
+  "/dashboard": typeof ProtectedDashboardIndexRoute;
+  "/dashboard/analytics/reports": typeof ProtectedDashboardAnalyticsReportsRoute;
+  "/dashboard/assets/exports": typeof ProtectedDashboardAssetsExportsRoute;
+  "/dashboard/assets/trash": typeof ProtectedDashboardAssetsTrashRoute;
+  "/dashboard/billing/invoices": typeof ProtectedDashboardBillingInvoicesRoute;
+  "/dashboard/billing/subscription": typeof ProtectedDashboardBillingSubscriptionRoute;
+  "/dashboard/developers/api-keys": typeof ProtectedDashboardDevelopersApiKeysRoute;
+  "/dashboard/developers/docs": typeof ProtectedDashboardDevelopersDocsRoute;
+  "/dashboard/integrations/apps": typeof ProtectedDashboardIntegrationsAppsRoute;
+  "/dashboard/integrations/webhooks": typeof ProtectedDashboardIntegrationsWebhooksRoute;
+  "/dashboard/studio/editor": typeof ProtectedDashboardStudioEditorRoute;
+  "/dashboard/studio/new": typeof ProtectedDashboardStudioNewRoute;
+  "/dashboard/team/members": typeof ProtectedDashboardTeamMembersRoute;
+  "/dashboard/team/roles": typeof ProtectedDashboardTeamRolesRoute;
+  "/dashboard/videos/$videoId": typeof ProtectedDashboardVideosVideoIdRoute;
+  "/dashboard/analytics": typeof ProtectedDashboardAnalyticsIndexRoute;
+  "/dashboard/assets": typeof ProtectedDashboardAssetsIndexRoute;
+  "/dashboard/billing": typeof ProtectedDashboardBillingIndexRoute;
+  "/dashboard/developers": typeof ProtectedDashboardDevelopersIndexRoute;
+  "/dashboard/integrations": typeof ProtectedDashboardIntegrationsIndexRoute;
+  "/dashboard/projects": typeof ProtectedDashboardProjectsIndexRoute;
+  "/dashboard/studio": typeof ProtectedDashboardStudioIndexRoute;
+  "/dashboard/team": typeof ProtectedDashboardTeamIndexRoute;
+  "/dashboard/projects/f/$folderId": typeof ProtectedDashboardProjectsFFolderIdRoute;
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/_protected': typeof ProtectedRouteWithChildren
-  '/auth': typeof AuthRouteWithChildren
-  '/_protected/dashboard': typeof ProtectedDashboardRouteWithChildren
-  '/_protected/onboarding': typeof ProtectedOnboardingRoute
-  '/auth/login': typeof AuthLoginRoute
-  '/auth/signup': typeof AuthSignupRoute
-  '/_protected/dashboard/': typeof ProtectedDashboardIndexRoute
-  '/_protected/dashboard/analytics/reports': typeof ProtectedDashboardAnalyticsReportsRoute
-  '/_protected/dashboard/assets/exports': typeof ProtectedDashboardAssetsExportsRoute
-  '/_protected/dashboard/assets/trash': typeof ProtectedDashboardAssetsTrashRoute
-  '/_protected/dashboard/billing/invoices': typeof ProtectedDashboardBillingInvoicesRoute
-  '/_protected/dashboard/billing/subscription': typeof ProtectedDashboardBillingSubscriptionRoute
-  '/_protected/dashboard/developers/api-keys': typeof ProtectedDashboardDevelopersApiKeysRoute
-  '/_protected/dashboard/developers/docs': typeof ProtectedDashboardDevelopersDocsRoute
-  '/_protected/dashboard/integrations/apps': typeof ProtectedDashboardIntegrationsAppsRoute
-  '/_protected/dashboard/integrations/webhooks': typeof ProtectedDashboardIntegrationsWebhooksRoute
-  '/_protected/dashboard/studio/editor': typeof ProtectedDashboardStudioEditorRoute
-  '/_protected/dashboard/studio/new': typeof ProtectedDashboardStudioNewRoute
-  '/_protected/dashboard/team/members': typeof ProtectedDashboardTeamMembersRoute
-  '/_protected/dashboard/team/roles': typeof ProtectedDashboardTeamRolesRoute
-  '/_protected/dashboard/videos/$videoId': typeof ProtectedDashboardVideosVideoIdRoute
-  '/_protected/dashboard/analytics/': typeof ProtectedDashboardAnalyticsIndexRoute
-  '/_protected/dashboard/assets/': typeof ProtectedDashboardAssetsIndexRoute
-  '/_protected/dashboard/billing/': typeof ProtectedDashboardBillingIndexRoute
-  '/_protected/dashboard/developers/': typeof ProtectedDashboardDevelopersIndexRoute
-  '/_protected/dashboard/integrations/': typeof ProtectedDashboardIntegrationsIndexRoute
-  '/_protected/dashboard/projects/': typeof ProtectedDashboardProjectsIndexRoute
-  '/_protected/dashboard/studio/': typeof ProtectedDashboardStudioIndexRoute
-  '/_protected/dashboard/team/': typeof ProtectedDashboardTeamIndexRoute
-  '/_protected/dashboard/projects/f/$folderId': typeof ProtectedDashboardProjectsFFolderIdRoute
+  __root__: typeof rootRouteImport;
+  "/": typeof IndexRoute;
+  "/_protected": typeof ProtectedRouteWithChildren;
+  "/auth": typeof AuthRouteWithChildren;
+  "/_protected/dashboard": typeof ProtectedDashboardRouteWithChildren;
+  "/_protected/onboarding": typeof ProtectedOnboardingRoute;
+  "/auth/login": typeof AuthLoginRoute;
+  "/auth/signup": typeof AuthSignupRoute;
+  "/_protected/dashboard/": typeof ProtectedDashboardIndexRoute;
+  "/_protected/dashboard/analytics/reports": typeof ProtectedDashboardAnalyticsReportsRoute;
+  "/_protected/dashboard/assets/exports": typeof ProtectedDashboardAssetsExportsRoute;
+  "/_protected/dashboard/assets/trash": typeof ProtectedDashboardAssetsTrashRoute;
+  "/_protected/dashboard/billing/invoices": typeof ProtectedDashboardBillingInvoicesRoute;
+  "/_protected/dashboard/billing/subscription": typeof ProtectedDashboardBillingSubscriptionRoute;
+  "/_protected/dashboard/developers/api-keys": typeof ProtectedDashboardDevelopersApiKeysRoute;
+  "/_protected/dashboard/developers/docs": typeof ProtectedDashboardDevelopersDocsRoute;
+  "/_protected/dashboard/integrations/apps": typeof ProtectedDashboardIntegrationsAppsRoute;
+  "/_protected/dashboard/integrations/webhooks": typeof ProtectedDashboardIntegrationsWebhooksRoute;
+  "/_protected/dashboard/studio/editor": typeof ProtectedDashboardStudioEditorRoute;
+  "/_protected/dashboard/studio/new": typeof ProtectedDashboardStudioNewRoute;
+  "/_protected/dashboard/team/members": typeof ProtectedDashboardTeamMembersRoute;
+  "/_protected/dashboard/team/roles": typeof ProtectedDashboardTeamRolesRoute;
+  "/_protected/dashboard/videos/$videoId": typeof ProtectedDashboardVideosVideoIdRoute;
+  "/_protected/dashboard/analytics/": typeof ProtectedDashboardAnalyticsIndexRoute;
+  "/_protected/dashboard/assets/": typeof ProtectedDashboardAssetsIndexRoute;
+  "/_protected/dashboard/billing/": typeof ProtectedDashboardBillingIndexRoute;
+  "/_protected/dashboard/developers/": typeof ProtectedDashboardDevelopersIndexRoute;
+  "/_protected/dashboard/integrations/": typeof ProtectedDashboardIntegrationsIndexRoute;
+  "/_protected/dashboard/projects/": typeof ProtectedDashboardProjectsIndexRoute;
+  "/_protected/dashboard/studio/": typeof ProtectedDashboardStudioIndexRoute;
+  "/_protected/dashboard/team/": typeof ProtectedDashboardTeamIndexRoute;
+  "/_protected/dashboard/projects/f/$folderId": typeof ProtectedDashboardProjectsFFolderIdRoute;
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath
+  fileRoutesByFullPath: FileRoutesByFullPath;
   fullPaths:
-    | '/'
-    | '/auth'
-    | '/dashboard'
-    | '/onboarding'
-    | '/auth/login'
-    | '/auth/signup'
-    | '/dashboard/'
-    | '/dashboard/analytics/reports'
-    | '/dashboard/assets/exports'
-    | '/dashboard/assets/trash'
-    | '/dashboard/billing/invoices'
-    | '/dashboard/billing/subscription'
-    | '/dashboard/developers/api-keys'
-    | '/dashboard/developers/docs'
-    | '/dashboard/integrations/apps'
-    | '/dashboard/integrations/webhooks'
-    | '/dashboard/studio/editor'
-    | '/dashboard/studio/new'
-    | '/dashboard/team/members'
-    | '/dashboard/team/roles'
-    | '/dashboard/videos/$videoId'
-    | '/dashboard/analytics/'
-    | '/dashboard/assets/'
-    | '/dashboard/billing/'
-    | '/dashboard/developers/'
-    | '/dashboard/integrations/'
-    | '/dashboard/projects/'
-    | '/dashboard/studio/'
-    | '/dashboard/team/'
-    | '/dashboard/projects/f/$folderId'
-  fileRoutesByTo: FileRoutesByTo
+    | "/"
+    | "/auth"
+    | "/dashboard"
+    | "/onboarding"
+    | "/auth/login"
+    | "/auth/signup"
+    | "/dashboard/"
+    | "/dashboard/analytics/reports"
+    | "/dashboard/assets/exports"
+    | "/dashboard/assets/trash"
+    | "/dashboard/billing/invoices"
+    | "/dashboard/billing/subscription"
+    | "/dashboard/developers/api-keys"
+    | "/dashboard/developers/docs"
+    | "/dashboard/integrations/apps"
+    | "/dashboard/integrations/webhooks"
+    | "/dashboard/studio/editor"
+    | "/dashboard/studio/new"
+    | "/dashboard/team/members"
+    | "/dashboard/team/roles"
+    | "/dashboard/videos/$videoId"
+    | "/dashboard/analytics/"
+    | "/dashboard/assets/"
+    | "/dashboard/billing/"
+    | "/dashboard/developers/"
+    | "/dashboard/integrations/"
+    | "/dashboard/projects/"
+    | "/dashboard/studio/"
+    | "/dashboard/team/"
+    | "/dashboard/projects/f/$folderId";
+  fileRoutesByTo: FileRoutesByTo;
   to:
-    | '/'
-    | '/auth'
-    | '/onboarding'
-    | '/auth/login'
-    | '/auth/signup'
-    | '/dashboard'
-    | '/dashboard/analytics/reports'
-    | '/dashboard/assets/exports'
-    | '/dashboard/assets/trash'
-    | '/dashboard/billing/invoices'
-    | '/dashboard/billing/subscription'
-    | '/dashboard/developers/api-keys'
-    | '/dashboard/developers/docs'
-    | '/dashboard/integrations/apps'
-    | '/dashboard/integrations/webhooks'
-    | '/dashboard/studio/editor'
-    | '/dashboard/studio/new'
-    | '/dashboard/team/members'
-    | '/dashboard/team/roles'
-    | '/dashboard/videos/$videoId'
-    | '/dashboard/analytics'
-    | '/dashboard/assets'
-    | '/dashboard/billing'
-    | '/dashboard/developers'
-    | '/dashboard/integrations'
-    | '/dashboard/projects'
-    | '/dashboard/studio'
-    | '/dashboard/team'
-    | '/dashboard/projects/f/$folderId'
+    | "/"
+    | "/auth"
+    | "/onboarding"
+    | "/auth/login"
+    | "/auth/signup"
+    | "/dashboard"
+    | "/dashboard/analytics/reports"
+    | "/dashboard/assets/exports"
+    | "/dashboard/assets/trash"
+    | "/dashboard/billing/invoices"
+    | "/dashboard/billing/subscription"
+    | "/dashboard/developers/api-keys"
+    | "/dashboard/developers/docs"
+    | "/dashboard/integrations/apps"
+    | "/dashboard/integrations/webhooks"
+    | "/dashboard/studio/editor"
+    | "/dashboard/studio/new"
+    | "/dashboard/team/members"
+    | "/dashboard/team/roles"
+    | "/dashboard/videos/$videoId"
+    | "/dashboard/analytics"
+    | "/dashboard/assets"
+    | "/dashboard/billing"
+    | "/dashboard/developers"
+    | "/dashboard/integrations"
+    | "/dashboard/projects"
+    | "/dashboard/studio"
+    | "/dashboard/team"
+    | "/dashboard/projects/f/$folderId";
   id:
-    | '__root__'
-    | '/'
-    | '/_protected'
-    | '/auth'
-    | '/_protected/dashboard'
-    | '/_protected/onboarding'
-    | '/auth/login'
-    | '/auth/signup'
-    | '/_protected/dashboard/'
-    | '/_protected/dashboard/analytics/reports'
-    | '/_protected/dashboard/assets/exports'
-    | '/_protected/dashboard/assets/trash'
-    | '/_protected/dashboard/billing/invoices'
-    | '/_protected/dashboard/billing/subscription'
-    | '/_protected/dashboard/developers/api-keys'
-    | '/_protected/dashboard/developers/docs'
-    | '/_protected/dashboard/integrations/apps'
-    | '/_protected/dashboard/integrations/webhooks'
-    | '/_protected/dashboard/studio/editor'
-    | '/_protected/dashboard/studio/new'
-    | '/_protected/dashboard/team/members'
-    | '/_protected/dashboard/team/roles'
-    | '/_protected/dashboard/videos/$videoId'
-    | '/_protected/dashboard/analytics/'
-    | '/_protected/dashboard/assets/'
-    | '/_protected/dashboard/billing/'
-    | '/_protected/dashboard/developers/'
-    | '/_protected/dashboard/integrations/'
-    | '/_protected/dashboard/projects/'
-    | '/_protected/dashboard/studio/'
-    | '/_protected/dashboard/team/'
-    | '/_protected/dashboard/projects/f/$folderId'
-  fileRoutesById: FileRoutesById
+    | "__root__"
+    | "/"
+    | "/_protected"
+    | "/auth"
+    | "/_protected/dashboard"
+    | "/_protected/onboarding"
+    | "/auth/login"
+    | "/auth/signup"
+    | "/_protected/dashboard/"
+    | "/_protected/dashboard/analytics/reports"
+    | "/_protected/dashboard/assets/exports"
+    | "/_protected/dashboard/assets/trash"
+    | "/_protected/dashboard/billing/invoices"
+    | "/_protected/dashboard/billing/subscription"
+    | "/_protected/dashboard/developers/api-keys"
+    | "/_protected/dashboard/developers/docs"
+    | "/_protected/dashboard/integrations/apps"
+    | "/_protected/dashboard/integrations/webhooks"
+    | "/_protected/dashboard/studio/editor"
+    | "/_protected/dashboard/studio/new"
+    | "/_protected/dashboard/team/members"
+    | "/_protected/dashboard/team/roles"
+    | "/_protected/dashboard/videos/$videoId"
+    | "/_protected/dashboard/analytics/"
+    | "/_protected/dashboard/assets/"
+    | "/_protected/dashboard/billing/"
+    | "/_protected/dashboard/developers/"
+    | "/_protected/dashboard/integrations/"
+    | "/_protected/dashboard/projects/"
+    | "/_protected/dashboard/studio/"
+    | "/_protected/dashboard/team/"
+    | "/_protected/dashboard/projects/f/$folderId";
+  fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  ProtectedRoute: typeof ProtectedRouteWithChildren
-  AuthRoute: typeof AuthRouteWithChildren
+  IndexRoute: typeof IndexRoute;
+  ProtectedRoute: typeof ProtectedRouteWithChildren;
+  AuthRoute: typeof AuthRouteWithChildren;
 }
 
-declare module '@tanstack/react-router' {
+declare module "@tanstack/react-router" {
   interface FileRoutesByPath {
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_protected': {
-      id: '/_protected'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof ProtectedRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/signup': {
-      id: '/auth/signup'
-      path: '/signup'
-      fullPath: '/auth/signup'
-      preLoaderRoute: typeof AuthSignupRouteImport
-      parentRoute: typeof AuthRoute
-    }
-    '/auth/login': {
-      id: '/auth/login'
-      path: '/login'
-      fullPath: '/auth/login'
-      preLoaderRoute: typeof AuthLoginRouteImport
-      parentRoute: typeof AuthRoute
-    }
-    '/_protected/onboarding': {
-      id: '/_protected/onboarding'
-      path: '/onboarding'
-      fullPath: '/onboarding'
-      preLoaderRoute: typeof ProtectedOnboardingRouteImport
-      parentRoute: typeof ProtectedRoute
-    }
-    '/_protected/dashboard': {
-      id: '/_protected/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof ProtectedDashboardRouteImport
-      parentRoute: typeof ProtectedRoute
-    }
-    '/_protected/dashboard/': {
-      id: '/_protected/dashboard/'
-      path: '/'
-      fullPath: '/dashboard/'
-      preLoaderRoute: typeof ProtectedDashboardIndexRouteImport
-      parentRoute: typeof ProtectedDashboardRoute
-    }
-    '/_protected/dashboard/team/': {
-      id: '/_protected/dashboard/team/'
-      path: '/team'
-      fullPath: '/dashboard/team/'
-      preLoaderRoute: typeof ProtectedDashboardTeamIndexRouteImport
-      parentRoute: typeof ProtectedDashboardRoute
-    }
-    '/_protected/dashboard/studio/': {
-      id: '/_protected/dashboard/studio/'
-      path: '/studio'
-      fullPath: '/dashboard/studio/'
-      preLoaderRoute: typeof ProtectedDashboardStudioIndexRouteImport
-      parentRoute: typeof ProtectedDashboardRoute
-    }
-    '/_protected/dashboard/projects/': {
-      id: '/_protected/dashboard/projects/'
-      path: '/projects'
-      fullPath: '/dashboard/projects/'
-      preLoaderRoute: typeof ProtectedDashboardProjectsIndexRouteImport
-      parentRoute: typeof ProtectedDashboardRoute
-    }
-    '/_protected/dashboard/integrations/': {
-      id: '/_protected/dashboard/integrations/'
-      path: '/integrations'
-      fullPath: '/dashboard/integrations/'
-      preLoaderRoute: typeof ProtectedDashboardIntegrationsIndexRouteImport
-      parentRoute: typeof ProtectedDashboardRoute
-    }
-    '/_protected/dashboard/developers/': {
-      id: '/_protected/dashboard/developers/'
-      path: '/developers'
-      fullPath: '/dashboard/developers/'
-      preLoaderRoute: typeof ProtectedDashboardDevelopersIndexRouteImport
-      parentRoute: typeof ProtectedDashboardRoute
-    }
-    '/_protected/dashboard/billing/': {
-      id: '/_protected/dashboard/billing/'
-      path: '/billing'
-      fullPath: '/dashboard/billing/'
-      preLoaderRoute: typeof ProtectedDashboardBillingIndexRouteImport
-      parentRoute: typeof ProtectedDashboardRoute
-    }
-    '/_protected/dashboard/assets/': {
-      id: '/_protected/dashboard/assets/'
-      path: '/assets'
-      fullPath: '/dashboard/assets/'
-      preLoaderRoute: typeof ProtectedDashboardAssetsIndexRouteImport
-      parentRoute: typeof ProtectedDashboardRoute
-    }
-    '/_protected/dashboard/analytics/': {
-      id: '/_protected/dashboard/analytics/'
-      path: '/analytics'
-      fullPath: '/dashboard/analytics/'
-      preLoaderRoute: typeof ProtectedDashboardAnalyticsIndexRouteImport
-      parentRoute: typeof ProtectedDashboardRoute
-    }
-    '/_protected/dashboard/videos/$videoId': {
-      id: '/_protected/dashboard/videos/$videoId'
-      path: '/videos/$videoId'
-      fullPath: '/dashboard/videos/$videoId'
-      preLoaderRoute: typeof ProtectedDashboardVideosVideoIdRouteImport
-      parentRoute: typeof ProtectedDashboardRoute
-    }
-    '/_protected/dashboard/team/roles': {
-      id: '/_protected/dashboard/team/roles'
-      path: '/team/roles'
-      fullPath: '/dashboard/team/roles'
-      preLoaderRoute: typeof ProtectedDashboardTeamRolesRouteImport
-      parentRoute: typeof ProtectedDashboardRoute
-    }
-    '/_protected/dashboard/team/members': {
-      id: '/_protected/dashboard/team/members'
-      path: '/team/members'
-      fullPath: '/dashboard/team/members'
-      preLoaderRoute: typeof ProtectedDashboardTeamMembersRouteImport
-      parentRoute: typeof ProtectedDashboardRoute
-    }
-    '/_protected/dashboard/studio/new': {
-      id: '/_protected/dashboard/studio/new'
-      path: '/studio/new'
-      fullPath: '/dashboard/studio/new'
-      preLoaderRoute: typeof ProtectedDashboardStudioNewRouteImport
-      parentRoute: typeof ProtectedDashboardRoute
-    }
-    '/_protected/dashboard/studio/editor': {
-      id: '/_protected/dashboard/studio/editor'
-      path: '/studio/editor'
-      fullPath: '/dashboard/studio/editor'
-      preLoaderRoute: typeof ProtectedDashboardStudioEditorRouteImport
-      parentRoute: typeof ProtectedDashboardRoute
-    }
-    '/_protected/dashboard/integrations/webhooks': {
-      id: '/_protected/dashboard/integrations/webhooks'
-      path: '/integrations/webhooks'
-      fullPath: '/dashboard/integrations/webhooks'
-      preLoaderRoute: typeof ProtectedDashboardIntegrationsWebhooksRouteImport
-      parentRoute: typeof ProtectedDashboardRoute
-    }
-    '/_protected/dashboard/integrations/apps': {
-      id: '/_protected/dashboard/integrations/apps'
-      path: '/integrations/apps'
-      fullPath: '/dashboard/integrations/apps'
-      preLoaderRoute: typeof ProtectedDashboardIntegrationsAppsRouteImport
-      parentRoute: typeof ProtectedDashboardRoute
-    }
-    '/_protected/dashboard/developers/docs': {
-      id: '/_protected/dashboard/developers/docs'
-      path: '/developers/docs'
-      fullPath: '/dashboard/developers/docs'
-      preLoaderRoute: typeof ProtectedDashboardDevelopersDocsRouteImport
-      parentRoute: typeof ProtectedDashboardRoute
-    }
-    '/_protected/dashboard/developers/api-keys': {
-      id: '/_protected/dashboard/developers/api-keys'
-      path: '/developers/api-keys'
-      fullPath: '/dashboard/developers/api-keys'
-      preLoaderRoute: typeof ProtectedDashboardDevelopersApiKeysRouteImport
-      parentRoute: typeof ProtectedDashboardRoute
-    }
-    '/_protected/dashboard/billing/subscription': {
-      id: '/_protected/dashboard/billing/subscription'
-      path: '/billing/subscription'
-      fullPath: '/dashboard/billing/subscription'
-      preLoaderRoute: typeof ProtectedDashboardBillingSubscriptionRouteImport
-      parentRoute: typeof ProtectedDashboardRoute
-    }
-    '/_protected/dashboard/billing/invoices': {
-      id: '/_protected/dashboard/billing/invoices'
-      path: '/billing/invoices'
-      fullPath: '/dashboard/billing/invoices'
-      preLoaderRoute: typeof ProtectedDashboardBillingInvoicesRouteImport
-      parentRoute: typeof ProtectedDashboardRoute
-    }
-    '/_protected/dashboard/assets/trash': {
-      id: '/_protected/dashboard/assets/trash'
-      path: '/assets/trash'
-      fullPath: '/dashboard/assets/trash'
-      preLoaderRoute: typeof ProtectedDashboardAssetsTrashRouteImport
-      parentRoute: typeof ProtectedDashboardRoute
-    }
-    '/_protected/dashboard/assets/exports': {
-      id: '/_protected/dashboard/assets/exports'
-      path: '/assets/exports'
-      fullPath: '/dashboard/assets/exports'
-      preLoaderRoute: typeof ProtectedDashboardAssetsExportsRouteImport
-      parentRoute: typeof ProtectedDashboardRoute
-    }
-    '/_protected/dashboard/analytics/reports': {
-      id: '/_protected/dashboard/analytics/reports'
-      path: '/analytics/reports'
-      fullPath: '/dashboard/analytics/reports'
-      preLoaderRoute: typeof ProtectedDashboardAnalyticsReportsRouteImport
-      parentRoute: typeof ProtectedDashboardRoute
-    }
-    '/_protected/dashboard/projects/f/$folderId': {
-      id: '/_protected/dashboard/projects/f/$folderId'
-      path: '/projects/f/$folderId'
-      fullPath: '/dashboard/projects/f/$folderId'
-      preLoaderRoute: typeof ProtectedDashboardProjectsFFolderIdRouteImport
-      parentRoute: typeof ProtectedDashboardRoute
-    }
+    "/": {
+      id: "/";
+      path: "/";
+      fullPath: "/";
+      preLoaderRoute: typeof IndexRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/_protected": {
+      id: "/_protected";
+      path: "";
+      fullPath: "/";
+      preLoaderRoute: typeof ProtectedRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/auth": {
+      id: "/auth";
+      path: "/auth";
+      fullPath: "/auth";
+      preLoaderRoute: typeof AuthRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/_protected/dashboard": {
+      id: "/_protected/dashboard";
+      path: "/dashboard";
+      fullPath: "/dashboard";
+      preLoaderRoute: typeof ProtectedDashboardRouteImport;
+      parentRoute: typeof ProtectedRoute;
+    };
+    "/_protected/onboarding": {
+      id: "/_protected/onboarding";
+      path: "/onboarding";
+      fullPath: "/onboarding";
+      preLoaderRoute: typeof ProtectedOnboardingRouteImport;
+      parentRoute: typeof ProtectedRoute;
+    };
+    "/auth/login": {
+      id: "/auth/login";
+      path: "/login";
+      fullPath: "/auth/login";
+      preLoaderRoute: typeof AuthLoginRouteImport;
+      parentRoute: typeof AuthRoute;
+    };
+    "/auth/signup": {
+      id: "/auth/signup";
+      path: "/signup";
+      fullPath: "/auth/signup";
+      preLoaderRoute: typeof AuthSignupRouteImport;
+      parentRoute: typeof AuthRoute;
+    };
+    "/_protected/dashboard/": {
+      id: "/_protected/dashboard/";
+      path: "/";
+      fullPath: "/dashboard/";
+      preLoaderRoute: typeof ProtectedDashboardIndexRouteImport;
+      parentRoute: typeof ProtectedDashboardRoute;
+    };
+    "/_protected/dashboard/analytics/": {
+      id: "/_protected/dashboard/analytics/";
+      path: "/analytics";
+      fullPath: "/dashboard/analytics/";
+      preLoaderRoute: typeof ProtectedDashboardAnalyticsIndexRouteImport;
+      parentRoute: typeof ProtectedDashboardRoute;
+    };
+    "/_protected/dashboard/analytics/reports": {
+      id: "/_protected/dashboard/analytics/reports";
+      path: "/analytics/reports";
+      fullPath: "/dashboard/analytics/reports";
+      preLoaderRoute: typeof ProtectedDashboardAnalyticsReportsRouteImport;
+      parentRoute: typeof ProtectedDashboardRoute;
+    };
+    "/_protected/dashboard/assets/": {
+      id: "/_protected/dashboard/assets/";
+      path: "/assets";
+      fullPath: "/dashboard/assets/";
+      preLoaderRoute: typeof ProtectedDashboardAssetsIndexRouteImport;
+      parentRoute: typeof ProtectedDashboardRoute;
+    };
+    "/_protected/dashboard/assets/exports": {
+      id: "/_protected/dashboard/assets/exports";
+      path: "/assets/exports";
+      fullPath: "/dashboard/assets/exports";
+      preLoaderRoute: typeof ProtectedDashboardAssetsExportsRouteImport;
+      parentRoute: typeof ProtectedDashboardRoute;
+    };
+    "/_protected/dashboard/assets/trash": {
+      id: "/_protected/dashboard/assets/trash";
+      path: "/assets/trash";
+      fullPath: "/dashboard/assets/trash";
+      preLoaderRoute: typeof ProtectedDashboardAssetsTrashRouteImport;
+      parentRoute: typeof ProtectedDashboardRoute;
+    };
+    "/_protected/dashboard/billing/": {
+      id: "/_protected/dashboard/billing/";
+      path: "/billing";
+      fullPath: "/dashboard/billing/";
+      preLoaderRoute: typeof ProtectedDashboardBillingIndexRouteImport;
+      parentRoute: typeof ProtectedDashboardRoute;
+    };
+    "/_protected/dashboard/billing/invoices": {
+      id: "/_protected/dashboard/billing/invoices";
+      path: "/billing/invoices";
+      fullPath: "/dashboard/billing/invoices";
+      preLoaderRoute: typeof ProtectedDashboardBillingInvoicesRouteImport;
+      parentRoute: typeof ProtectedDashboardRoute;
+    };
+    "/_protected/dashboard/billing/subscription": {
+      id: "/_protected/dashboard/billing/subscription";
+      path: "/billing/subscription";
+      fullPath: "/dashboard/billing/subscription";
+      preLoaderRoute: typeof ProtectedDashboardBillingSubscriptionRouteImport;
+      parentRoute: typeof ProtectedDashboardRoute;
+    };
+    "/_protected/dashboard/developers/": {
+      id: "/_protected/dashboard/developers/";
+      path: "/developers";
+      fullPath: "/dashboard/developers/";
+      preLoaderRoute: typeof ProtectedDashboardDevelopersIndexRouteImport;
+      parentRoute: typeof ProtectedDashboardRoute;
+    };
+    "/_protected/dashboard/developers/api-keys": {
+      id: "/_protected/dashboard/developers/api-keys";
+      path: "/developers/api-keys";
+      fullPath: "/dashboard/developers/api-keys";
+      preLoaderRoute: typeof ProtectedDashboardDevelopersApiKeysRouteImport;
+      parentRoute: typeof ProtectedDashboardRoute;
+    };
+    "/_protected/dashboard/developers/docs": {
+      id: "/_protected/dashboard/developers/docs";
+      path: "/developers/docs";
+      fullPath: "/dashboard/developers/docs";
+      preLoaderRoute: typeof ProtectedDashboardDevelopersDocsRouteImport;
+      parentRoute: typeof ProtectedDashboardRoute;
+    };
+    "/_protected/dashboard/integrations/": {
+      id: "/_protected/dashboard/integrations/";
+      path: "/integrations";
+      fullPath: "/dashboard/integrations/";
+      preLoaderRoute: typeof ProtectedDashboardIntegrationsIndexRouteImport;
+      parentRoute: typeof ProtectedDashboardRoute;
+    };
+    "/_protected/dashboard/integrations/apps": {
+      id: "/_protected/dashboard/integrations/apps";
+      path: "/integrations/apps";
+      fullPath: "/dashboard/integrations/apps";
+      preLoaderRoute: typeof ProtectedDashboardIntegrationsAppsRouteImport;
+      parentRoute: typeof ProtectedDashboardRoute;
+    };
+    "/_protected/dashboard/integrations/webhooks": {
+      id: "/_protected/dashboard/integrations/webhooks";
+      path: "/integrations/webhooks";
+      fullPath: "/dashboard/integrations/webhooks";
+      preLoaderRoute: typeof ProtectedDashboardIntegrationsWebhooksRouteImport;
+      parentRoute: typeof ProtectedDashboardRoute;
+    };
+    "/_protected/dashboard/projects/": {
+      id: "/_protected/dashboard/projects/";
+      path: "/projects";
+      fullPath: "/dashboard/projects/";
+      preLoaderRoute: typeof ProtectedDashboardProjectsIndexRouteImport;
+      parentRoute: typeof ProtectedDashboardRoute;
+    };
+    "/_protected/dashboard/studio/": {
+      id: "/_protected/dashboard/studio/";
+      path: "/studio";
+      fullPath: "/dashboard/studio/";
+      preLoaderRoute: typeof ProtectedDashboardStudioIndexRouteImport;
+      parentRoute: typeof ProtectedDashboardRoute;
+    };
+    "/_protected/dashboard/studio/editor": {
+      id: "/_protected/dashboard/studio/editor";
+      path: "/studio/editor";
+      fullPath: "/dashboard/studio/editor";
+      preLoaderRoute: typeof ProtectedDashboardStudioEditorRouteImport;
+      parentRoute: typeof ProtectedDashboardRoute;
+    };
+    "/_protected/dashboard/studio/new": {
+      id: "/_protected/dashboard/studio/new";
+      path: "/studio/new";
+      fullPath: "/dashboard/studio/new";
+      preLoaderRoute: typeof ProtectedDashboardStudioNewRouteImport;
+      parentRoute: typeof ProtectedDashboardRoute;
+    };
+    "/_protected/dashboard/team/": {
+      id: "/_protected/dashboard/team/";
+      path: "/team";
+      fullPath: "/dashboard/team/";
+      preLoaderRoute: typeof ProtectedDashboardTeamIndexRouteImport;
+      parentRoute: typeof ProtectedDashboardRoute;
+    };
+    "/_protected/dashboard/team/members": {
+      id: "/_protected/dashboard/team/members";
+      path: "/team/members";
+      fullPath: "/dashboard/team/members";
+      preLoaderRoute: typeof ProtectedDashboardTeamMembersRouteImport;
+      parentRoute: typeof ProtectedDashboardRoute;
+    };
+    "/_protected/dashboard/team/roles": {
+      id: "/_protected/dashboard/team/roles";
+      path: "/team/roles";
+      fullPath: "/dashboard/team/roles";
+      preLoaderRoute: typeof ProtectedDashboardTeamRolesRouteImport;
+      parentRoute: typeof ProtectedDashboardRoute;
+    };
+    "/_protected/dashboard/videos/$videoId": {
+      id: "/_protected/dashboard/videos/$videoId";
+      path: "/videos/$videoId";
+      fullPath: "/dashboard/videos/$videoId";
+      preLoaderRoute: typeof ProtectedDashboardVideosVideoIdRouteImport;
+      parentRoute: typeof ProtectedDashboardRoute;
+    };
+    "/_protected/dashboard/projects/f/$folderId": {
+      id: "/_protected/dashboard/projects/f/$folderId";
+      path: "/projects/f/$folderId";
+      fullPath: "/dashboard/projects/f/$folderId";
+      preLoaderRoute: typeof ProtectedDashboardProjectsFFolderIdRouteImport;
+      parentRoute: typeof ProtectedDashboardRoute;
+    };
   }
 }
 
 interface ProtectedDashboardRouteChildren {
-  ProtectedDashboardIndexRoute: typeof ProtectedDashboardIndexRoute
-  ProtectedDashboardAnalyticsReportsRoute: typeof ProtectedDashboardAnalyticsReportsRoute
-  ProtectedDashboardAssetsExportsRoute: typeof ProtectedDashboardAssetsExportsRoute
-  ProtectedDashboardAssetsTrashRoute: typeof ProtectedDashboardAssetsTrashRoute
-  ProtectedDashboardBillingInvoicesRoute: typeof ProtectedDashboardBillingInvoicesRoute
-  ProtectedDashboardBillingSubscriptionRoute: typeof ProtectedDashboardBillingSubscriptionRoute
-  ProtectedDashboardDevelopersApiKeysRoute: typeof ProtectedDashboardDevelopersApiKeysRoute
-  ProtectedDashboardDevelopersDocsRoute: typeof ProtectedDashboardDevelopersDocsRoute
-  ProtectedDashboardIntegrationsAppsRoute: typeof ProtectedDashboardIntegrationsAppsRoute
-  ProtectedDashboardIntegrationsWebhooksRoute: typeof ProtectedDashboardIntegrationsWebhooksRoute
-  ProtectedDashboardStudioEditorRoute: typeof ProtectedDashboardStudioEditorRoute
-  ProtectedDashboardStudioNewRoute: typeof ProtectedDashboardStudioNewRoute
-  ProtectedDashboardTeamMembersRoute: typeof ProtectedDashboardTeamMembersRoute
-  ProtectedDashboardTeamRolesRoute: typeof ProtectedDashboardTeamRolesRoute
-  ProtectedDashboardVideosVideoIdRoute: typeof ProtectedDashboardVideosVideoIdRoute
-  ProtectedDashboardAnalyticsIndexRoute: typeof ProtectedDashboardAnalyticsIndexRoute
-  ProtectedDashboardAssetsIndexRoute: typeof ProtectedDashboardAssetsIndexRoute
-  ProtectedDashboardBillingIndexRoute: typeof ProtectedDashboardBillingIndexRoute
-  ProtectedDashboardDevelopersIndexRoute: typeof ProtectedDashboardDevelopersIndexRoute
-  ProtectedDashboardIntegrationsIndexRoute: typeof ProtectedDashboardIntegrationsIndexRoute
-  ProtectedDashboardProjectsIndexRoute: typeof ProtectedDashboardProjectsIndexRoute
-  ProtectedDashboardStudioIndexRoute: typeof ProtectedDashboardStudioIndexRoute
-  ProtectedDashboardTeamIndexRoute: typeof ProtectedDashboardTeamIndexRoute
-  ProtectedDashboardProjectsFFolderIdRoute: typeof ProtectedDashboardProjectsFFolderIdRoute
+  ProtectedDashboardIndexRoute: typeof ProtectedDashboardIndexRoute;
+  ProtectedDashboardAnalyticsReportsRoute: typeof ProtectedDashboardAnalyticsReportsRoute;
+  ProtectedDashboardAssetsExportsRoute: typeof ProtectedDashboardAssetsExportsRoute;
+  ProtectedDashboardAssetsTrashRoute: typeof ProtectedDashboardAssetsTrashRoute;
+  ProtectedDashboardBillingInvoicesRoute: typeof ProtectedDashboardBillingInvoicesRoute;
+  ProtectedDashboardBillingSubscriptionRoute: typeof ProtectedDashboardBillingSubscriptionRoute;
+  ProtectedDashboardDevelopersApiKeysRoute: typeof ProtectedDashboardDevelopersApiKeysRoute;
+  ProtectedDashboardDevelopersDocsRoute: typeof ProtectedDashboardDevelopersDocsRoute;
+  ProtectedDashboardIntegrationsAppsRoute: typeof ProtectedDashboardIntegrationsAppsRoute;
+  ProtectedDashboardIntegrationsWebhooksRoute: typeof ProtectedDashboardIntegrationsWebhooksRoute;
+  ProtectedDashboardStudioEditorRoute: typeof ProtectedDashboardStudioEditorRoute;
+  ProtectedDashboardStudioNewRoute: typeof ProtectedDashboardStudioNewRoute;
+  ProtectedDashboardTeamMembersRoute: typeof ProtectedDashboardTeamMembersRoute;
+  ProtectedDashboardTeamRolesRoute: typeof ProtectedDashboardTeamRolesRoute;
+  ProtectedDashboardVideosVideoIdRoute: typeof ProtectedDashboardVideosVideoIdRoute;
+  ProtectedDashboardAnalyticsIndexRoute: typeof ProtectedDashboardAnalyticsIndexRoute;
+  ProtectedDashboardAssetsIndexRoute: typeof ProtectedDashboardAssetsIndexRoute;
+  ProtectedDashboardBillingIndexRoute: typeof ProtectedDashboardBillingIndexRoute;
+  ProtectedDashboardDevelopersIndexRoute: typeof ProtectedDashboardDevelopersIndexRoute;
+  ProtectedDashboardIntegrationsIndexRoute: typeof ProtectedDashboardIntegrationsIndexRoute;
+  ProtectedDashboardProjectsIndexRoute: typeof ProtectedDashboardProjectsIndexRoute;
+  ProtectedDashboardStudioIndexRoute: typeof ProtectedDashboardStudioIndexRoute;
+  ProtectedDashboardTeamIndexRoute: typeof ProtectedDashboardTeamIndexRoute;
+  ProtectedDashboardProjectsFFolderIdRoute: typeof ProtectedDashboardProjectsFFolderIdRoute;
 }
 
 const ProtectedDashboardRouteChildren: ProtectedDashboardRouteChildren = {
   ProtectedDashboardIndexRoute: ProtectedDashboardIndexRoute,
-  ProtectedDashboardAnalyticsReportsRoute:
-    ProtectedDashboardAnalyticsReportsRoute,
+  ProtectedDashboardAnalyticsReportsRoute: ProtectedDashboardAnalyticsReportsRoute,
   ProtectedDashboardAssetsExportsRoute: ProtectedDashboardAssetsExportsRoute,
   ProtectedDashboardAssetsTrashRoute: ProtectedDashboardAssetsTrashRoute,
-  ProtectedDashboardBillingInvoicesRoute:
-    ProtectedDashboardBillingInvoicesRoute,
-  ProtectedDashboardBillingSubscriptionRoute:
-    ProtectedDashboardBillingSubscriptionRoute,
-  ProtectedDashboardDevelopersApiKeysRoute:
-    ProtectedDashboardDevelopersApiKeysRoute,
+  ProtectedDashboardBillingInvoicesRoute: ProtectedDashboardBillingInvoicesRoute,
+  ProtectedDashboardBillingSubscriptionRoute: ProtectedDashboardBillingSubscriptionRoute,
+  ProtectedDashboardDevelopersApiKeysRoute: ProtectedDashboardDevelopersApiKeysRoute,
   ProtectedDashboardDevelopersDocsRoute: ProtectedDashboardDevelopersDocsRoute,
-  ProtectedDashboardIntegrationsAppsRoute:
-    ProtectedDashboardIntegrationsAppsRoute,
-  ProtectedDashboardIntegrationsWebhooksRoute:
-    ProtectedDashboardIntegrationsWebhooksRoute,
+  ProtectedDashboardIntegrationsAppsRoute: ProtectedDashboardIntegrationsAppsRoute,
+  ProtectedDashboardIntegrationsWebhooksRoute: ProtectedDashboardIntegrationsWebhooksRoute,
   ProtectedDashboardStudioEditorRoute: ProtectedDashboardStudioEditorRoute,
   ProtectedDashboardStudioNewRoute: ProtectedDashboardStudioNewRoute,
   ProtectedDashboardTeamMembersRoute: ProtectedDashboardTeamMembersRoute,
@@ -695,60 +669,50 @@ const ProtectedDashboardRouteChildren: ProtectedDashboardRouteChildren = {
   ProtectedDashboardAnalyticsIndexRoute: ProtectedDashboardAnalyticsIndexRoute,
   ProtectedDashboardAssetsIndexRoute: ProtectedDashboardAssetsIndexRoute,
   ProtectedDashboardBillingIndexRoute: ProtectedDashboardBillingIndexRoute,
-  ProtectedDashboardDevelopersIndexRoute:
-    ProtectedDashboardDevelopersIndexRoute,
-  ProtectedDashboardIntegrationsIndexRoute:
-    ProtectedDashboardIntegrationsIndexRoute,
+  ProtectedDashboardDevelopersIndexRoute: ProtectedDashboardDevelopersIndexRoute,
+  ProtectedDashboardIntegrationsIndexRoute: ProtectedDashboardIntegrationsIndexRoute,
   ProtectedDashboardProjectsIndexRoute: ProtectedDashboardProjectsIndexRoute,
   ProtectedDashboardStudioIndexRoute: ProtectedDashboardStudioIndexRoute,
   ProtectedDashboardTeamIndexRoute: ProtectedDashboardTeamIndexRoute,
-  ProtectedDashboardProjectsFFolderIdRoute:
-    ProtectedDashboardProjectsFFolderIdRoute,
-}
+  ProtectedDashboardProjectsFFolderIdRoute: ProtectedDashboardProjectsFFolderIdRoute,
+};
 
-const ProtectedDashboardRouteWithChildren =
-  ProtectedDashboardRoute._addFileChildren(ProtectedDashboardRouteChildren)
+const ProtectedDashboardRouteWithChildren = ProtectedDashboardRoute._addFileChildren(ProtectedDashboardRouteChildren);
 
 interface ProtectedRouteChildren {
-  ProtectedDashboardRoute: typeof ProtectedDashboardRouteWithChildren
-  ProtectedOnboardingRoute: typeof ProtectedOnboardingRoute
+  ProtectedDashboardRoute: typeof ProtectedDashboardRouteWithChildren;
+  ProtectedOnboardingRoute: typeof ProtectedOnboardingRoute;
 }
 
 const ProtectedRouteChildren: ProtectedRouteChildren = {
   ProtectedDashboardRoute: ProtectedDashboardRouteWithChildren,
   ProtectedOnboardingRoute: ProtectedOnboardingRoute,
-}
+};
 
-const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(
-  ProtectedRouteChildren,
-)
+const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(ProtectedRouteChildren);
 
 interface AuthRouteChildren {
-  AuthLoginRoute: typeof AuthLoginRoute
-  AuthSignupRoute: typeof AuthSignupRoute
+  AuthLoginRoute: typeof AuthLoginRoute;
+  AuthSignupRoute: typeof AuthSignupRoute;
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
   AuthLoginRoute: AuthLoginRoute,
   AuthSignupRoute: AuthSignupRoute,
-}
+};
 
-const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren);
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ProtectedRoute: ProtectedRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
-}
-export const routeTree = rootRouteImport
-  ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>()
+};
+export const routeTree = rootRouteImport._addFileChildren(rootRouteChildren)._addFileTypes<FileRouteTypes>();
 
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
+declare module "@tanstack/react-start" {
   interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
+    ssr: true;
+    router: Awaited<ReturnType<typeof getRouter>>;
   }
 }
