@@ -1,0 +1,55 @@
+---
+title: Introduction
+description: What VidcastX is, what works today, and where to go next.
+---
+
+VidcastX is open-source (MIT), self-hostable video infrastructure in the style of Mux. You upload a video, a worker transcodes it into adaptive HLS with FFmpeg, and the output lands in your own S3-compatible bucket. Every component runs on machines you control:
+
+- **API**: Elysia on Bun (`apps/api`, port 4001)
+- **Dashboard**: TanStack Start (`apps/app`, port 4000)
+- **Transcoder**: a Node worker that shells out to the FFmpeg CLI (`workers/transcoder`)
+- **Infrastructure**: PostgreSQL (Drizzle ORM), Redis (BullMQ), S3 or MinIO
+- **Auth**: Better Auth, with organizations and roles
+
+## Current status
+
+<Callout type="warn" title="Pre-release">
+  VidcastX is in active development and is not production-ready. Nothing about deployment (containers, secrets, backups,
+  observability) is codified yet.
+</Callout>
+
+| Area                            | State                                                                                                                  |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Auth and organizations          | Implemented: email/password, GitHub and Discord sign-in, organizations with members and roles.                         |
+| Video library                   | Implemented: drafts, folders, metadata editing, pinning. Delete and restore are stubs until V1.                        |
+| Upload                          | Works: resumable S3 multipart uploads straight from the browser using presigned part URLs.                             |
+| Transcode                       | Works: HLS ladder (1080p/720p/480p, never above the source except the 480p floor), poster JPEG and WebM hover preview. |
+| Playback player                 | In progress for V1. The API already returns a signed URL for the master playlist.                                      |
+| API keys                        | In progress for V1.                                                                                                    |
+| Webhooks                        | In progress for V1.                                                                                                    |
+| AI, live streaming, and billing | Database tables exist. No user-facing implementation.                                                                  |
+
+`IDEA.md` at the repository root defines the product and what V1 contains. The phased plan and progress live in `tasks/todo.md`.
+
+## Where to go next
+
+<Cards>
+  <Card title="Quickstart" href="/docs/getting-started/quickstart">
+    Run the whole stack locally with Docker Compose and pnpm.
+  </Card>
+  <Card title="Project structure" href="/docs/getting-started/project-structure">
+    What each app and package in the monorepo does.
+  </Card>
+  <Card title="Architecture overview" href="/docs/architecture/overview">
+    How the API, dashboard, worker, and infrastructure fit together.
+  </Card>
+  <Card title="Video pipeline" href="/docs/architecture/video-pipeline">
+    Follow one upload from the browser to `ready`.
+  </Card>
+  <Card title="Transcoding" href="/docs/architecture/transcoding">
+    How the worker turns a source file into adaptive HLS, and why.
+  </Card>
+  <Card title="Contributing" href="/docs/contributing">
+    Branch model, commit format and the checks to run before a PR.
+  </Card>
+</Cards>

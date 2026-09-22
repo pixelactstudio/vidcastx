@@ -2,7 +2,7 @@
   "*.{ts,tsx,js,jsx,mjs,cjs}": [
     "pnpm exec eslint --fix --max-warnings 0 --no-warn-ignored"
   ],
-  "*.{ts,tsx,js,jsx,mjs,cjs,json,css,md,yml,yaml}": [
+  "*.{ts,tsx,js,jsx,mjs,cjs,json,css,md,mdx,yml,yaml}": [
     "pnpm exec prettier --write"
   ]
 }

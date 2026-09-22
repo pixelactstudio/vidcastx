@@ -7,6 +7,7 @@
     "dev": "turbo dev",
     "dev:app": "turbo watch dev -F app...",
     "dev:api": "turbo watch dev -F api...",
+    "dev:docs": "turbo watch dev -F docs...",
     "start": "turbo start",
     "test": "turbo run test",
     "lint": "turbo run lint --continue -- --cache --cache-location .cache/.eslintcache",

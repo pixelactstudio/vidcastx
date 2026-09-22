@@ -1,0 +1,40 @@
+{
+  "name": "docs",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev --port 4002",
+    "build": "vite build",
+    "start": "vite preview --port 4002",
+    "lint": "eslint --max-warnings 0",
+    "format": "prettier --check . --ignore-path ../../.gitignore --ignore-path .prettierignore",
+    "check-types": "tsc --noEmit",
+    "clean": "git clean -xdf .cache .source .tanstack .turbo dist node_modules"
+  },
+  "dependencies": {
+    "@tanstack/react-router": "^1.170.38",
+    "@tanstack/react-start": "^1.168.57",
+    "fumadocs-core": "16.15.12",
+    "fumadocs-mdx": "15.4.3",
+    "fumadocs-ui": "npm:@fumadocs/base-ui@16.15.12",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.2.2",
+    "@types/mdx": "^2.0.14",
+    "@types/node": "^25.3.3",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vidcastx/eslint-config": "workspace:*",
+    "@vidcastx/prettier": "workspace:*",
+    "@vidcastx/typescript-config": "workspace:*",
+    "@vitejs/plugin-react": "^5.2.0",
+    "eslint": "^9.39.4",
+    "tailwindcss": "^4.2.2",
+    "typescript": "^6.0.2",
+    "vite": "^7.3.6",
+    "vite-tsconfig-paths": "^5.1.4"
+  },
+  "prettier": "@vidcastx/prettier"
+}

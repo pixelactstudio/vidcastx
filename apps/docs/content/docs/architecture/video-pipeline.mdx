@@ -1,0 +1,150 @@
+---
+title: Video pipeline
+description: One upload traced from the browser to a ready HLS stream, with the status machine behind it.
+---
+
+This page follows a single video through the system. All paths are relative to the repository root. All HTTP routes are prefixed with `/api/v1/videos` unless the step says otherwise.
+
+## The status machine
+
+`video.status` is a Postgres enum, `video_status` in `packages/database/src/schema/video-schema.ts`. Its values, in declaration order, are `draft`, `uploaded`, `queued`, `dispatched`, `processing`, `ready` and `failed`.
+
+This is how the code moves a video between them today:
+
+```text
+ draft ──complete──► queued ──dispatcher──► dispatched ──worker starts──► processing ──success──► ready
+   │                                                                          │  ▲
+   │ abort                                                              error │  │ BullMQ retry
+   ▼                                                                          ▼  │ (3 attempts in total)
+ failed                                                                      failed
+```
+
+| Status       | Set by                                                           | Meaning                                                               |
+| ------------ | ---------------------------------------------------------------- | --------------------------------------------------------------------- |
+| `draft`      | `VideoService.createDraft` (API)                                 | Row exists and the raw storage key is reserved. No bytes yet.         |
+| `uploaded`   | Nothing, currently                                               | Reserved in the enum. Completing an upload goes straight to `queued`. |
+| `queued`     | `VideoService.completeMultipart` (API)                           | Raw file is in storage and waiting for the dispatcher.                |
+| `dispatched` | `dispatchFairly` (API cron)                                      | A BullMQ job has been enqueued.                                       |
+| `processing` | Worker, through `PATCH /api/internal/videos/:id/status`          | The worker picked the job up.                                         |
+| `ready`      | Worker, through the same route                                   | HLS, poster and preview are in storage and their asset rows exist.    |
+| `failed`     | Worker (FFmpeg or upload error), or the API on `multipart/abort` | `error_reason` says why.                                              |
+
+## Step by step
+
+<Steps>
+<Step>
+
+### 1. Create a draft
+
+`POST /api/v1/videos` with `{ filename, title?, folderId? }`.
+
+The API generates a video ID and inserts a `draft` row. It also reserves the raw storage key `raw/{orgId}/{videoId}.{ext}`, taking the extension from the filename, and stores that key in `master_access_url`. The browser now has a video ID to attach the upload to.
+
+</Step>
+<Step>
+
+### 2. Start a multipart upload
+
+`POST /api/v1/videos/:id/multipart/init` with `{ contentType }`.
+
+The API calls S3 `CreateMultipartUpload` for the reserved key and returns `{ uploadId, key }`.
+
+</Step>
+<Step>
+
+### 3. Upload parts directly to storage
+
+For each part, the browser calls `GET /api/v1/videos/:id/multipart/sign-part?uploadId=…&partNumber=…` and gets a presigned `UploadPart` URL, valid for 1 hour. It then `PUT`s the bytes to S3 or MinIO directly.
+
+The dashboard uses Uppy's `@uppy/aws-s3` plugin with `shouldUseMultipart: true` and up to 4 concurrent requests (`apps/app/src/lib/uppy-client.ts`). It accepts `video/*` files up to 50 GB.
+
+- **Resume**: `GET …/multipart/list-parts?uploadId=…` returns the parts S3 already has, so Uppy can skip them.
+- **Cancel**: `DELETE …/multipart/abort` aborts the S3 upload and marks the video `failed` with `error_reason = "Upload aborted"`.
+
+</Step>
+<Step>
+
+### 4. Complete the upload
+
+`POST /api/v1/videos/:id/multipart/complete` with `{ uploadId, parts: [{ PartNumber, ETag }] }`.
+
+The API calls `CompleteMultipartUpload`, and S3 stitches the parts into one object. The API sets the video to **`queued`**. Nothing is enqueued yet.
+
+</Step>
+<Step>
+
+### 5. Dispatch fairly
+
+`apps/api/src/modules/internal/cron.ts` registers a cron (`*/5 * * * * *`, so every 5 seconds) inside the API process. Each tick calls `dispatchFairly()` from `dispatcher.ts`, which does the following:
+
+1. Takes a Redis lock: `SET dispatcher:lock locked EX 10 NX`. If the key already exists, another API instance is dispatching and this tick returns.
+2. Loads every organization that has a video in `dispatched` or `processing`. Those organizations are busy.
+3. Loads every `queued` video, oldest first.
+4. Picks at most **one** video per organization that is not busy.
+5. For each pick, sets the status to `dispatched` and adds a `process-video` job to the `video-transcode` BullMQ queue with `{ videoId, orgId, userId, s3InputKey }`.
+6. Deletes the lock.
+
+Videos missing an uploader or a raw storage key are skipped and logged.
+
+<Callout title="Why a dispatcher instead of enqueueing on upload?">
+  If uploads went straight into BullMQ, one organization that uploads 500 videos would fill the queue, and everyone else
+  would wait behind it. Keeping the backlog in Postgres and admitting one active transcode per organization gives
+  round-robin fairness across tenants. BullMQ only ever holds work that should run now.
+</Callout>
+
+</Step>
+<Step>
+
+### 6. Transcode
+
+The worker (`workers/transcoder/src/index.ts`) takes one job at a time (`concurrency: 1`). For each job it:
+
+1. Reports **`processing`** to the API.
+2. Downloads `s3InputKey` into a temporary directory, `$TMPDIR/vidcastx-transcode-{videoId}`.
+3. Probes the file and runs a single FFmpeg process that writes the whole HLS ladder.
+4. Uploads every file in the output directory to `processed/{orgId}/{videoId}/`. Playlists get the content type `application/vnd.apple.mpegurl` and segments get `video/MP2T`.
+5. Generates the poster and hover preview in parallel and uploads them to `thumbnails/` and `previews/`. If this step fails, the error is logged and the job continues.
+6. Reports **`ready`** with the storage keys, the duration in whole seconds, and the source height (for example `1080p`).
+7. Deletes the temporary directory, whatever the outcome.
+
+[Transcoding](/docs/architecture/transcoding) covers steps 3 and 5 in detail.
+
+</Step>
+<Step>
+
+### 7. Report status back
+
+The worker calls `PATCH /api/internal/videos/:id/status` with a machine-to-machine bearer token (see [Authentication](/docs/architecture/overview#authentication)). The body looks like this:
+
+```json
+{
+  "status": "ready",
+  "playbackKey": "processed/<orgId>/<videoId>/master.m3u8",
+  "thumbnailKey": "thumbnails/<orgId>/<videoId>.jpg",
+  "previewKey": "previews/<orgId>/<videoId>.webm",
+  "duration": 94,
+  "resolution": "1080p"
+}
+```
+
+`status` must be `processing`, `ready` or `failed`. Any keys present are stored as `asset` rows of type `hls_playlist`, `thumbnail` and `preview_gif`. The video row then gets the new status, `duration`, `resolution` and `error_reason`.
+
+</Step>
+</Steps>
+
+## Failures and retries
+
+If anything in step 6 throws, the worker reports `failed` with the error message as `errorReason` and rethrows. BullMQ then retries the job according to the queue defaults in `packages/queue`: **3 attempts** in total, exponential backoff starting at 1 second. A retry reports `processing` again. Failed jobs stay in Redis after the last attempt (`removeOnFail: false`), and successful jobs are removed.
+
+If the worker can't reach the API at all, `notifyApiStatus` throws. The job fails and BullMQ retries it the same way.
+
+## Playback (in progress)
+
+`GET /api/v1/videos` returns each video with three presigned GET URLs, each valid for 1 hour: `thumbnailUrl`, `previewUrl` and `playbackUrl`. `playbackUrl` points at `master.m3u8`. The dashboard already uses the poster and the hover preview. A player for the HLS stream is part of the V1 work.
+
+<Callout type="warn" title="Signed playlists and relative segment URLs">
+  A presigned URL authorizes exactly one object. `master.m3u8` refers to its rendition playlists and segments by
+  relative path, and the player requests those without a signature. That works locally only because the Compose sidecar
+  makes `vidcastx-bucket` publicly readable. A private bucket needs a different delivery scheme, such as signed cookies,
+  a signing proxy, or rewriting playlists with per-object signatures.
+</Callout>
