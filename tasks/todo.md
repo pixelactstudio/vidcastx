@@ -15,8 +15,15 @@ Each phase is a feature branch (`pnpm worktree:new feat/<name>`) merged into `de
 - [x] `pnpm worktree:new` / `pnpm worktree:setup`
 - [x] Agent skills installed; `IDEA.md` rewritten around V1
 - [x] `apps/docs` (Fumadocs, offline)
+- [x] Lockfile refreshed within declared ranges: `pnpm audit` 59 → 2 moderate (vitest 3)
 
-**Review:** `dev` and `main` in sync; only draft #69 left open. `pnpm audit` still reports advisories in transitive dev tooling (eslint, shadcn CLI, better-auth's optional Next.js peer); track through Renovate.
+**Review:** `dev` and `main` synced through #82, #84, #85, #87 and #86; only draft #69 is open. `CI` is a required check on both branches.
+
+**Follow-ups:**
+
+- [ ] Allow GitHub Actions to create pull requests (org Settings → Actions → General, then the repo's), then re-run the Release workflow so release-please opens its PR
+- [ ] Upgrade better-auth to 1.7 (held on `~1.6` plus a `@better-auth/core` override in `pnpm-workspace.yaml`; 1.7 changes the secondary-storage and plugin option types in `packages/auth`)
+- [ ] vitest 4 major (clears the last two audit advisories)
 
 ## Phase 1 — Foundations (day 1)
 
@@ -29,6 +36,12 @@ Each phase is a feature branch (`pnpm worktree:new feat/<name>`) merged into `de
   - [ ] upload progress (`90 * Math.floor(uploaded / total)` sits at 0 until the end)
   - [ ] preview asset type: output is WebM but stored as `preview_gif`
   - [ ] graceful shutdown on SIGTERM
+  - [ ] align keyframes across renditions (fixed GOP, `-sc_threshold 0`) so players can switch rungs cleanly
+  - [ ] `-ac:${idx}` targets output stream N, not audio stream N (`-ac:a:${idx}`)
+  - [ ] sources below 480p are upscaled to the 480p floor
+  - [ ] `CONCURRENT_JOBS` is never read
+- [ ] Status machine: `uploaded` is never set (multipart complete jumps to `queued`)
+- [ ] `createbuckets` in docker-compose hard-codes the MinIO credentials; read them from the same env vars as the `minio` service
 - [ ] Integration test harness for the API against real Postgres/Redis/MinIO (docker compose services in CI)
 
 ## Phase 2 — Developer API (day 2)
