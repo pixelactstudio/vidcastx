@@ -3,7 +3,6 @@
 Composable Elysia function for controlling lifecycle/schema/context with full type safety. Available in hook after definition control by key-value label.
 
 ## Basic Pattern
-
 ```typescript
 .macro({
   hi: (word: string) => ({
@@ -14,9 +13,7 @@ Composable Elysia function for controlling lifecycle/schema/context with full ty
 ```
 
 ## Property Shorthand
-
 Object → function accepting boolean:
-
 ```typescript
 .macro({
 	// These equivalent:
@@ -26,9 +23,7 @@ Object → function accepting boolean:
 ```
 
 ## Error Handling
-
 Return `status`, don't throw:
-
 ```typescript
 .macro({
   auth: {
@@ -41,7 +36,6 @@ Return `status`, don't throw:
 ```
 
 ## Resolve - Add Context Props
-
 ```typescript
 .macro({
   user: (enabled: true) => ({
@@ -52,18 +46,14 @@ Return `status`, don't throw:
 ```
 
 ### Named Macro for Type Inference
-
 TypeScript limitation workaround:
-
 ```typescript
 .macro('user', { resolve: () => ({ user: 'lilith' }) })
 .macro('user2', { user: true, resolve: ({ user }) => {} })
 ```
 
 ## Schema
-
 Auto-validates, infers types, stacks with other schemas:
-
 ```typescript
 .macro({
   withFriends: {
@@ -75,9 +65,7 @@ Auto-validates, infers types, stacks with other schemas:
 Use named single macro for lifecycle type inference within same macro.
 
 ## Extension
-
 Stack macros:
-
 ```typescript
 .macro({
   sartre: { body: t.Object({...}) },
@@ -87,9 +75,7 @@ Stack macros:
 ```
 
 ## Deduplication
-
 Auto-dedupes by property value. Custom seed:
-
 ```typescript
 .macro({ sartre: (role: string) => ({ seed: role, ... }) })
 ```

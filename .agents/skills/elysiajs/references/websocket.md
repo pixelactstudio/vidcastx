@@ -3,15 +3,15 @@
 ## Basic WebSocket
 
 ```typescript
-import { Elysia } from "elysia";
+import { Elysia } from 'elysia'
 
 new Elysia()
-  .ws("/chat", {
+  .ws('/chat', {
     message(ws, message) {
-      ws.send(message); // Echo back
-    },
+      ws.send(message)  // Echo back
+    }
   })
-  .listen(3000);
+  .listen(3000)
 ```
 
 ## With Validation
@@ -60,20 +60,22 @@ import { Elysia, t } from 'elysia'
 ## Broadcasting
 
 ```typescript
-const connections = new Set<any>().ws("/chat", {
+const connections = new Set<any>()
+
+.ws('/chat', {
   open(ws) {
-    connections.add(ws);
+    connections.add(ws)
   },
   message(ws, message) {
     // Broadcast to all connected clients
     for (const client of connections) {
-      client.send(message);
+      client.send(message)
     }
   },
   close(ws) {
-    connections.delete(ws);
-  },
-});
+    connections.delete(ws)
+  }
+})
 ```
 
 ## With Authentication
@@ -95,36 +97,38 @@ const connections = new Set<any>().ws("/chat", {
 ## Room-Based Chat
 
 ```typescript
-const rooms = new Map<string, Set<any>>().ws("/chat/:room", {
+const rooms = new Map<string, Set<any>>()
+
+.ws('/chat/:room', {
   open(ws) {
-    const room = ws.data.params.room;
+    const room = ws.data.params.room
     if (!rooms.has(room)) {
-      rooms.set(room, new Set());
+      rooms.set(room, new Set())
     }
-    rooms.get(room)!.add(ws);
+    rooms.get(room)!.add(ws)
   },
   message(ws, message) {
-    const room = ws.data.params.room;
-    const clients = rooms.get(room);
-
+    const room = ws.data.params.room
+    const clients = rooms.get(room)
+    
     if (clients) {
       for (const client of clients) {
-        client.send(message);
+        client.send(message)
       }
     }
   },
   close(ws) {
-    const room = ws.data.params.room;
-    const clients = rooms.get(room);
-
+    const room = ws.data.params.room
+    const clients = rooms.get(room)
+    
     if (clients) {
-      clients.delete(ws);
+      clients.delete(ws)
       if (clients.size === 0) {
-        rooms.delete(room);
+        rooms.delete(room)
       }
     }
-  },
-});
+  }
+})
 ```
 
 ## With State/Context
@@ -149,51 +153,51 @@ const rooms = new Map<string, Set<any>>().ws("/chat/:room", {
 ## Client Usage (Browser)
 
 ```typescript
-const ws = new WebSocket("ws://localhost:3000/chat");
+const ws = new WebSocket('ws://localhost:3000/chat')
 
 ws.onopen = () => {
-  console.log("Connected");
-  ws.send("Hello Server!");
-};
+  console.log('Connected')
+  ws.send('Hello Server!')
+}
 
 ws.onmessage = (event) => {
-  console.log("Received:", event.data);
-};
+  console.log('Received:', event.data)
+}
 
 ws.onerror = (error) => {
-  console.error("Error:", error);
-};
+  console.error('Error:', error)
+}
 
 ws.onclose = () => {
-  console.log("Disconnected");
-};
+  console.log('Disconnected')
+}
 ```
 
 ## Eden Treaty WebSocket
 
 ```typescript
-// Client
-import { treaty } from "@elysiajs/eden";
-
-import type { App } from "./server";
-
 // Server
-export const app = new Elysia().ws("/chat", {
-  message(ws, message) {
-    ws.send(message);
-  },
-});
+export const app = new Elysia()
+  .ws('/chat', {
+    message(ws, message) {
+      ws.send(message)
+    }
+  })
 
-export type App = typeof app;
+export type App = typeof app
 
-const api = treaty<App>("localhost:3000");
-const chat = api.chat.subscribe();
+// Client
+import { treaty } from '@elysiajs/eden'
+import type { App } from './server'
+
+const api = treaty<App>('localhost:3000')
+const chat = api.chat.subscribe()
 
 chat.subscribe((message) => {
-  console.log("Received:", message);
-});
+  console.log('Received:', message)
+})
 
-chat.send("Hello!");
+chat.send('Hello!')
 ```
 
 ## Headers in WebSocket
@@ -235,11 +239,12 @@ const ws = new WebSocket('ws://localhost:3000/chat?username=john')
 ```typescript
 new Elysia({
   websocket: {
-    perMessageDeflate: true,
-  },
-}).ws("/chat", {
-  message(ws, message) {
-    ws.send(message);
-  },
-});
+    perMessageDeflate: true
+  }
+})
+  .ws('/chat', {
+    message(ws, message) {
+      ws.send(message)
+    }
+  })
 ```

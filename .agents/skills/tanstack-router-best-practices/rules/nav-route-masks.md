@@ -11,11 +11,11 @@ Route masks let you display one URL while internally routing to another. This is
 ```tsx
 // Modal without proper URL handling
 function PostList() {
-  const [selectedPost, setSelectedPost] = useState<string | null>(null);
+  const [selectedPost, setSelectedPost] = useState<string | null>(null)
 
   return (
     <div>
-      {posts.map((post) => (
+      {posts.map(post => (
         <div key={post.id} onClick={() => setSelectedPost(post.id)}>
           {post.title}
         </div>
@@ -27,7 +27,7 @@ function PostList() {
         </Modal>
       )}
     </div>
-  );
+  )
 }
 
 // Problems:
@@ -41,47 +41,47 @@ function PostList() {
 
 ```tsx
 // routes/posts.tsx
-export const Route = createFileRoute("/posts")({
+export const Route = createFileRoute('/posts')({
   component: PostList,
-});
+})
 
 function PostList() {
-  const posts = usePosts();
+  const posts = usePosts()
 
   return (
     <div>
-      {posts.map((post) => (
+      {posts.map(post => (
         <Link
           key={post.id}
           to="/posts/$postId"
           params={{ postId: post.id }}
           mask={{
-            to: "/posts",
+            to: '/posts',
             // URL shows /posts but routes to /posts/$postId
           }}
         >
           {post.title}
         </Link>
       ))}
-      <Outlet /> {/* Modal renders here */}
+      <Outlet />  {/* Modal renders here */}
     </div>
-  );
+  )
 }
 
 // routes/posts/$postId.tsx
-export const Route = createFileRoute("/posts/$postId")({
+export const Route = createFileRoute('/posts/$postId')({
   component: PostModal,
-});
+})
 
 function PostModal() {
-  const { postId } = Route.useParams();
-  const navigate = useNavigate();
+  const { postId } = Route.useParams()
+  const navigate = useNavigate()
 
   return (
-    <Modal onClose={() => navigate({ to: "/posts" })}>
+    <Modal onClose={() => navigate({ to: '/posts' })}>
       <PostDetail postId={postId} />
     </Modal>
-  );
+  )
 }
 
 // User clicks post:
@@ -97,21 +97,21 @@ function PostModal() {
 function PostList() {
   return (
     <div>
-      {posts.map((post) => (
+      {posts.map(post => (
         <Link
           key={post.id}
           to="/posts/$postId"
           params={{ postId: post.id }}
           mask={{
-            to: "/posts",
-            search: { modal: post.id }, // /posts?modal=123
+            to: '/posts',
+            search: { modal: post.id },  // /posts?modal=123
           }}
         >
           {post.title}
         </Link>
       ))}
     </div>
-  );
+  )
 }
 ```
 
@@ -119,25 +119,25 @@ function PostList() {
 
 ```tsx
 function PostCard({ post }: { post: Post }) {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
   const openInModal = () => {
     navigate({
-      to: "/posts/$postId",
+      to: '/posts/$postId',
       params: { postId: post.id },
       mask: {
-        to: "/posts",
+        to: '/posts',
       },
-    });
-  };
+    })
+  }
 
   const openFullPage = () => {
     navigate({
-      to: "/posts/$postId",
+      to: '/posts/$postId',
       params: { postId: post.id },
       // No mask - shows real URL
-    });
-  };
+    })
+  }
 
   return (
     <div>
@@ -145,7 +145,7 @@ function PostCard({ post }: { post: Post }) {
       <button onClick={openInModal}>Quick View</button>
       <button onClick={openFullPage}>Full Page</button>
     </div>
-  );
+  )
 }
 ```
 
@@ -153,37 +153,39 @@ function PostCard({ post }: { post: Post }) {
 
 ```tsx
 function PostModal() {
-  const { postId } = Route.useParams();
-  const navigate = useNavigate();
+  const { postId } = Route.useParams()
+  const navigate = useNavigate()
 
   const expandToFullPage = () => {
     // Navigate to real URL, removing mask
     navigate({
-      to: "/posts/$postId",
+      to: '/posts/$postId',
       params: { postId },
       // No mask = real URL
-      replace: true, // Replace history entry
-    });
-  };
+      replace: true,  // Replace history entry
+    })
+  }
 
   return (
     <Modal>
       <PostDetail postId={postId} />
-      <button onClick={expandToFullPage}>Expand to full page</button>
+      <button onClick={expandToFullPage}>
+        Expand to full page
+      </button>
     </Modal>
-  );
+  )
 }
 ```
 
 ## Route Mask Behavior
 
-| Scenario          | URL Shown             | Actual Route   |
-| ----------------- | --------------------- | -------------- |
-| Click masked link | Masked URL            | Real route     |
-| Share/copy URL    | Real URL              | Real route     |
-| Direct navigation | Real URL              | Real route     |
-| Browser refresh   | Depends on URL in bar | Matches URL    |
-| Back button       | Previous URL          | Previous route |
+| Scenario | URL Shown | Actual Route |
+|----------|-----------|--------------|
+| Click masked link | Masked URL | Real route |
+| Share/copy URL | Real URL | Real route |
+| Direct navigation | Real URL | Real route |
+| Browser refresh | Depends on URL in bar | Matches URL |
+| Back button | Previous URL | Previous route |
 
 ## Context
 

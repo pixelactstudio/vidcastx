@@ -4,7 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-VidcastX is a B2B enterprise video hosting, streaming, and AI-processing platform built as a Turbo monorepo using pnpm workspaces.
+VidcastX is open-source (MIT), self-hostable, Mux-shaped video infrastructure built as a Turbo monorepo using pnpm workspaces.
+
+`IDEA.md` defines the product and the V1 scope; check it before building a feature, and treat anything outside V1 as needing the owner's approval. The plan and progress live in `tasks/todo.md`.
 
 ## Commands
 
@@ -16,6 +18,14 @@ All commands are run from the repository root unless noted.
 pnpm dev                  # Run all apps in dev mode
 pnpm dev:app              # Run apps/app and its dependencies only
 pnpm dev:api              # Run apps/api and its dependencies only
+pnpm dev:docs             # Run the docs site (apps/docs, port 4002)
+```
+
+### Worktrees
+
+```bash
+pnpm worktree:new <branch>   # New worktree from origin/dev, env files copied, deps installed
+pnpm worktree:setup          # Prepare a worktree created by another tool
 ```
 
 ### Build & Type Check
@@ -58,6 +68,7 @@ docker compose up -d      # Start PostgreSQL, Redis, MinIO locally
 
 - **`apps/api`** — Elysia (Bun) REST API server, port `4001`. Routes live in `src/modules/v1/`. Uses cluster workers (`src/index.ts`) for multi-core utilization.
 - **`apps/app`** — TanStack Start (Vite + SSR) frontend, port `4000`. The active creator studio — all new feature work lands here.
+- **`apps/docs`** — Fumadocs documentation site on TanStack Start, port `4002`. Runs fully offline; user-facing and how-it-works docs go here.
 - **`workers/transcoder`** — FFmpeg-based background video encoding worker.
 - **`packages/database`** — Drizzle ORM schemas and migrations. All schema files are in `src/schema/`.
 - **`packages/auth`** — Better-Auth configuration shared between API and the frontend apps.

@@ -7,13 +7,10 @@ export const Route = createFileRoute("/_protected")({
     const session = await getSession();
 
     if (!session) {
-      // eslint-disable-next-line @typescript-eslint/only-throw-error -- TanStack Router's redirect() throws a special redirect object
       throw redirect({ to: "/auth/login", search: { redirect: location.href } });
     }
 
-    // If user has no organization, redirect to onboarding
     if (!session.user.hasOrganization && !location.pathname.startsWith("/onboarding")) {
-      // eslint-disable-next-line @typescript-eslint/only-throw-error -- TanStack Router's redirect() throws a special redirect object
       throw redirect({ to: "/onboarding" });
     }
 
@@ -34,7 +31,7 @@ export const Route = createFileRoute("/_protected")({
       <div className="flex min-h-screen items-center justify-center">
         <div className="space-y-4 text-center">
           <h1 className="text-2xl font-bold">Something went wrong</h1>
-          <p className="text-muted-foreground">{error.message}</p>
+          <p className="text-muted-foreground">{error instanceof Error ? error.message : "Unexpected error"}</p>
           <button
             onClick={() => {
               void router.invalidate();
