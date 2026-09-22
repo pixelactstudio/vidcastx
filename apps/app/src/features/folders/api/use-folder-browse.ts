@@ -6,9 +6,9 @@ import { folderKeys } from "./folder-keys";
 
 function extractErrorMessage(error: unknown, fallback: string): string {
   if (error && typeof error === "object" && "value" in error) {
-    const value = (error as { value: unknown }).value;
+    const value = error.value;
     if (value && typeof value === "object" && "error" in value) {
-      return String((value as { error: unknown }).error);
+      return String(value.error);
     }
   }
   return fallback;
