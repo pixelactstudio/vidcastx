@@ -25,8 +25,8 @@ Runs first for every incoming request.
 
 ```ts
 new Elysia().onRequest(({ ip, set }) => {
-  if (blocked(ip)) return (set.status = 429);
-});
+    if (blocked(ip)) return (set.status = 429)
+})
 ```
 
 ---
@@ -40,8 +40,8 @@ _Body parsing stage._
 
 ```ts
 new Elysia().onParse(({ request, contentType }) => {
-  if (contentType === "application/custom") return request.text();
-});
+    if (contentType === 'application/custom') return request.text()
+})
 ```
 
 ---
@@ -54,8 +54,8 @@ _Runs **just before validation**; can mutate the request context._
 
 ```ts
 new Elysia().onTransform(({ params }) => {
-  params.id = Number(params.id);
-});
+    params.id = Number(params.id)
+})
 ```
 
 ---
@@ -68,8 +68,8 @@ _Runs along with `onTransform` **but before validation**; adds per request value
 
 ```ts
 new Elysia().derive(({ headers }) => ({
-  bearer: headers.authorization?.replace(/^Bearer /, ""),
-}));
+    bearer: headers.authorization?.replace(/^Bearer /, '')
+}))
 ```
 
 ---
@@ -82,11 +82,11 @@ _Executed after validation, right before the route handler._
 - Returning a value skips the handler.
 
 ```ts
-new Elysia().get("/", () => "hi", {
-  beforeHandle({ cookie, status }) {
-    if (!cookie.session) return status(401);
-  },
-});
+new Elysia().get('/', () => 'hi', {
+    beforeHandle({ cookie, status }) {
+        if (!cookie.session) return status(401)
+    }
+})
 ```
 
 ---
@@ -98,13 +98,15 @@ _Like `derive` but runs **after validation** along "Before Handle" (so you can r
 - Usually placed inside a `guard` because it isn't available as a local hook.
 
 ```ts
-new Elysia().guard({ headers: t.Object({ authorization: t.String() }) }, (app) =>
-  app
-    .resolve(({ headers }) => ({
-      bearer: headers.authorization.split(" ")[1],
-    }))
-    .get("/", ({ bearer }) => bearer),
-);
+new Elysia().guard(
+    { headers: t.Object({ authorization: t.String() }) },
+    (app) =>
+        app
+            .resolve(({ headers }) => ({
+                bearer: headers.authorization.split(' ')[1]
+            }))
+            .get('/', ({ bearer }) => bearer)
+)
 ```
 
 ---
@@ -117,14 +119,14 @@ _Runs after the handler finishes._
 - Returning a value **replaces** the handlerâ€™s result, but the next `afterHandle` hooks still run.
 
 ```ts
-new Elysia().get("/", () => "<h1>Hello</h1>", {
-  afterHandle({ response, set }) {
-    if (isHtml(response)) {
-      set.headers["content-type"] = "text/html; charset=utf-8";
-      return new Response(response);
+new Elysia().get('/', () => '<h1>Hello</h1>', {
+    afterHandle({ response, set }) {
+        if (isHtml(response)) {
+            set.headers['content-type'] = 'text/html; charset=utf-8'
+            return new Response(response)
+        }
     }
-  },
-});
+})
 ```
 
 ---
@@ -137,15 +139,21 @@ _Runs right after all `afterHandle` hooks; maps **any** value to a Web standard 
 
 ```ts
 new Elysia().mapResponse(({ responseValue, set }) => {
-  const body = typeof responseValue === "object" ? JSON.stringify(responseValue) : String(responseValue ?? "");
+    const body =
+        typeof responseValue === 'object'
+            ? JSON.stringify(responseValue)
+            : String(responseValue ?? '')
 
-  set.headers["content-encoding"] = "gzip";
-  return new Response(Bun.gzipSync(new TextEncoder().encode(body)), {
-    headers: {
-      "Content-Type": typeof responseValue === "object" ? "application/json" : "text/plain",
-    },
-  });
-});
+    set.headers['content-encoding'] = 'gzip'
+    return new Response(Bun.gzipSync(new TextEncoder().encode(body)), {
+        headers: {
+            'Content-Type':
+                typeof responseValue === 'object'
+                    ? 'application/json'
+                    : 'text/plain'
+        }
+    })
+})
 ```
 
 ---
@@ -159,9 +167,9 @@ _Caught whenever an error bubbles up from any lifecycle stage._
 
 ```ts
 new Elysia().onError(({ code, status }) => {
-  if (code === "NOT_FOUND") return status(404, "â“ Not found");
-  return new Response("Oops", { status: 500 });
-});
+    if (code === 'NOT_FOUND') return status(404, 'â“ Not found')
+    return new Response('Oops', { status: 500 })
+})
 ```
 
 ---
@@ -173,7 +181,9 @@ _Runs **after** the response has been sent to the client._
 - Perfect for **logging, metrics, cleanup**.
 
 ```ts
-new Elysia().onAfterResponse(() => console.log("âœ… response sent at", Date.now()));
+new Elysia().onAfterResponse(() =>
+    console.log('âœ… response sent at', Date.now())
+)
 ```
 
 ---

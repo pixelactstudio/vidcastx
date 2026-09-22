@@ -13,13 +13,13 @@ Configure `defaultPreload: 'intent'` to preload routes when users hover or focus
 const router = createRouter({
   routeTree,
   // No defaultPreload - user waits after every navigation
-});
+})
 
 // Each navigation shows loading state
 function PostList({ posts }: { posts: Post[] }) {
   return (
     <ul>
-      {posts.map((post) => (
+      {posts.map(post => (
         <li key={post.id}>
           <Link to="/posts/$postId" params={{ postId: post.id }}>
             {post.title}
@@ -28,7 +28,7 @@ function PostList({ posts }: { posts: Post[] }) {
         </li>
       ))}
     </ul>
-  );
+  )
 }
 ```
 
@@ -38,13 +38,13 @@ function PostList({ posts }: { posts: Post[] }) {
 // router.tsx - Enable preloading by default
 const router = createRouter({
   routeTree,
-  defaultPreload: "intent", // Preload on hover/focus
-  defaultPreloadDelay: 50, // Wait 50ms before starting
-});
+  defaultPreload: 'intent',       // Preload on hover/focus
+  defaultPreloadDelay: 50,        // Wait 50ms before starting
+})
 
-declare module "@tanstack/react-router" {
+declare module '@tanstack/react-router' {
   interface Register {
-    router: typeof router;
+    router: typeof router
   }
 }
 
@@ -52,7 +52,7 @@ declare module "@tanstack/react-router" {
 function PostList({ posts }: { posts: Post[] }) {
   return (
     <ul>
-      {posts.map((post) => (
+      {posts.map(post => (
         <li key={post.id}>
           <Link to="/posts/$postId" params={{ postId: post.id }}>
             {post.title}
@@ -61,7 +61,7 @@ function PostList({ posts }: { posts: Post[] }) {
         </li>
       ))}
     </ul>
-  );
+  )
 }
 ```
 
@@ -94,12 +94,12 @@ const router = createRouter({
 
 ## Preload Strategies
 
-| Strategy     | Behavior                          | Use Case                    |
-| ------------ | --------------------------------- | --------------------------- |
-| `'intent'`   | Preload on hover/focus            | Default for most links      |
-| `'render'`   | Preload when Link mounts          | Critical next pages         |
-| `'viewport'` | Preload when Link enters viewport | Below-fold content          |
-| `false`      | No preloading                     | Heavy, rarely-visited pages |
+| Strategy | Behavior | Use Case |
+|----------|----------|----------|
+| `'intent'` | Preload on hover/focus | Default for most links |
+| `'render'` | Preload when Link mounts | Critical next pages |
+| `'viewport'` | Preload when Link enters viewport | Below-fold content |
+| `false` | No preloading | Heavy, rarely-visited pages |
 
 ## Good Example: With TanStack Query Integration
 
@@ -107,20 +107,20 @@ const router = createRouter({
 // When using TanStack Query, disable router cache
 const router = createRouter({
   routeTree,
-  defaultPreload: "intent",
-  defaultPreloadStaleTime: 0, // Let TanStack Query manage cache
+  defaultPreload: 'intent',
+  defaultPreloadStaleTime: 0,  // Let TanStack Query manage cache
   context: {
     queryClient,
   },
-});
+})
 
 // Route loader uses TanStack Query
-export const Route = createFileRoute("/posts/$postId")({
+export const Route = createFileRoute('/posts/$postId')({
   loader: async ({ params, context: { queryClient } }) => {
     // ensureQueryData respects TanStack Query's staleTime
-    await queryClient.ensureQueryData(postQueries.detail(params.postId));
+    await queryClient.ensureQueryData(postQueries.detail(params.postId))
   },
-});
+})
 ```
 
 ## Context

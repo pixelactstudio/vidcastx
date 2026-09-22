@@ -1,0 +1,29 @@
+name: Setup workspace
+description: Install pnpm, Node, Bun and the workspace dependencies, and restore the Turbo cache.
+
+runs:
+  using: composite
+  steps:
+    # Reads the pnpm version from package.json#packageManager.
+    - uses: pnpm/action-setup@v4
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version-file: .node-version
+        cache: pnpm
+
+    - uses: oven-sh/setup-bun@v2
+      with:
+        bun-version-file: .bun-version
+
+    - name: Restore Turbo cache
+      uses: actions/cache@v4
+      with:
+        path: .turbo/cache
+        key: turbo-${{ runner.os }}-${{ github.job }}-${{ github.sha }}
+        restore-keys: |
+          turbo-${{ runner.os }}-${{ github.job }}-
+
+    - name: Install dependencies
+      shell: bash
+      run: pnpm install --frozen-lockfile

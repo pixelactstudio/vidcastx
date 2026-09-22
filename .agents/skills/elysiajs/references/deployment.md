@@ -3,7 +3,6 @@
 ## Production Build
 
 ### Compile to Binary (Recommended)
-
 ```bash
 bun build \
   --compile \
@@ -15,20 +14,17 @@ bun build \
 ```
 
 **Benefits:**
-
 - No runtime needed on deployment server
 - Smaller memory footprint (2-3x reduction)
 - Faster startup
 - Single portable executable
 
 **Run the binary:**
-
 ```bash
 ./server
 ```
 
 ### Compile to JavaScript
-
 ```bash
 bun build \
   --minify-whitespace \
@@ -38,7 +34,6 @@ bun build \
 ```
 
 **Run:**
-
 ```bash
 NODE_ENV=production bun ./dist/index.js
 ```
@@ -46,7 +41,6 @@ NODE_ENV=production bun ./dist/index.js
 ## Docker
 
 ### Basic Dockerfile
-
 ```dockerfile
 FROM oven/bun:1 AS build
 
@@ -81,14 +75,12 @@ EXPOSE 3000
 ```
 
 ### Build and Run
-
 ```bash
 docker build -t my-elysia-app .
 docker run -p 3000:3000 my-elysia-app
 ```
 
 ### With Environment Variables
-
 ```dockerfile
 FROM gcr.io/distroless/base
 
@@ -110,31 +102,32 @@ EXPOSE 3000
 
 ```typescript
 // src/index.ts
-import cluster from "node:cluster";
-import os from "node:os";
-import process from "node:process";
+import cluster from 'node:cluster'
+import os from 'node:os'
+import process from 'node:process'
 
 if (cluster.isPrimary) {
   for (let i = 0; i < os.availableParallelism(); i++) {
-    cluster.fork();
+    cluster.fork()
   }
 } else {
-  await import("./server");
-  console.log(`Worker ${process.pid} started`);
+  await import('./server')
+  console.log(`Worker ${process.pid} started`)
 }
 ```
 
 ```typescript
 // src/server.ts
-import { Elysia } from "elysia";
+import { Elysia } from 'elysia'
 
-new Elysia().get("/", () => "Hello World!").listen(3000);
+new Elysia()
+  .get('/', () => 'Hello World!')
+  .listen(3000)
 ```
 
 ## Environment Variables
 
 ### .env File
-
 ```env
 NODE_ENV=production
 PORT=3000
@@ -144,37 +137,37 @@ CORS_ORIGIN=https://example.com
 ```
 
 ### Load in App
-
 ```typescript
-import { Elysia } from "elysia";
+import { Elysia } from 'elysia'
 
 const app = new Elysia()
-  .get("/env", () => ({
+  .get('/env', () => ({
     env: process.env.NODE_ENV,
-    port: process.env.PORT,
+    port: process.env.PORT
   }))
-  .listen(parseInt(process.env.PORT || "3000"));
+  .listen(parseInt(process.env.PORT || '3000'))
 ```
 
 ## Platform-Specific Deployments
 
 ### Railway
-
 ```typescript
 // Railway assigns random PORT via env variable
-new Elysia().get("/", () => "Hello Railway").listen(process.env.PORT ?? 3000);
+new Elysia()
+  .get('/', () => 'Hello Railway')
+  .listen(process.env.PORT ?? 3000)
 ```
 
 ### Vercel
-
 ```typescript
 // src/index.ts
-import { Elysia } from "elysia";
+import { Elysia } from 'elysia'
 
-export default new Elysia().get("/", () => "Hello Vercel");
+export default new Elysia()
+  .get('/', () => 'Hello Vercel')
 
-export const GET = app.fetch;
-export const POST = app.fetch;
+export const GET = app.fetch
+export const POST = app.fetch
 ```
 
 ```json
@@ -186,16 +179,15 @@ export const POST = app.fetch;
 ```
 
 ### Cloudflare Workers
-
 ```typescript
-import { Elysia } from "elysia";
-import { CloudflareAdapter } from "elysia/adapter/cloudflare-worker";
+import { Elysia } from 'elysia'
+import { CloudflareAdapter } from 'elysia/adapter/cloudflare-worker'
 
 export default new Elysia({
-  adapter: CloudflareAdapter,
+  adapter: CloudflareAdapter
 })
-  .get("/", () => "Hello Cloudflare!")
-  .compile();
+  .get('/', () => 'Hello Cloudflare!')
+  .compile()
 ```
 
 ```toml
@@ -206,97 +198,95 @@ compatibility_date = "2025-06-01"
 ```
 
 ### Node.js Adapter
-
 ```typescript
-import { node } from "@elysiajs/node";
-import { Elysia } from "elysia";
+import { Elysia } from 'elysia'
+import { node } from '@elysiajs/node'
 
-const app = new Elysia({ adapter: node() }).get("/", () => "Hello Node.js").listen(3000);
+const app = new Elysia({ adapter: node() })
+  .get('/', () => 'Hello Node.js')
+  .listen(3000)
 ```
 
 ## Performance Optimization
 
 ### Enable AoT Compilation
-
 ```typescript
 new Elysia({
-  aot: true, // Ahead-of-time compilation
-});
+  aot: true  // Ahead-of-time compilation
+})
 ```
 
 ### Use Native Static Response
-
 ```typescript
 new Elysia({
-  nativeStaticResponse: true,
-}).get("/version", 1); // Optimized for Bun.serve.static
+  nativeStaticResponse: true
+})
+  .get('/version', 1)  // Optimized for Bun.serve.static
 ```
 
 ### Precompile Routes
-
 ```typescript
 new Elysia({
-  precompile: true, // Compile all routes ahead of time
-});
+  precompile: true  // Compile all routes ahead of time
+})
 ```
 
 ## Health Checks
 
 ```typescript
 new Elysia()
-  .get("/health", () => ({
-    status: "ok",
-    timestamp: Date.now(),
+  .get('/health', () => ({
+    status: 'ok',
+    timestamp: Date.now()
   }))
-  .get("/ready", ({ db }) => {
+  .get('/ready', ({ db }) => {
     // Check database connection
-    const isDbReady = checkDbConnection();
-
+    const isDbReady = checkDbConnection()
+    
     if (!isDbReady) {
-      return status(503, { status: "not ready" });
+      return status(503, { status: 'not ready' })
     }
-
-    return { status: "ready" };
-  });
+    
+    return { status: 'ready' }
+  })
 ```
 
 ## Graceful Shutdown
 
 ```typescript
-import { Elysia } from "elysia";
+import { Elysia } from 'elysia'
 
-const app = new Elysia().get("/", () => "Hello").listen(3000);
+const app = new Elysia()
+  .get('/', () => 'Hello')
+  .listen(3000)
 
-process.on("SIGTERM", () => {
-  console.log("SIGTERM received, shutting down gracefully");
-  app.stop();
-  process.exit(0);
-});
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received, shutting down gracefully')
+  app.stop()
+  process.exit(0)
+})
 
-process.on("SIGINT", () => {
-  console.log("SIGINT received, shutting down gracefully");
-  app.stop();
-  process.exit(0);
-});
+process.on('SIGINT', () => {
+  console.log('SIGINT received, shutting down gracefully')
+  app.stop()
+  process.exit(0)
+})
 ```
 
 ## Monitoring
 
 ### OpenTelemetry
-
 ```typescript
-import { opentelemetry } from "@elysiajs/opentelemetry";
+import { opentelemetry } from '@elysiajs/opentelemetry'
 
-new Elysia().use(
-  opentelemetry({
-    serviceName: "my-service",
-    endpoint: "http://localhost:4318",
-  }),
-);
+new Elysia()
+  .use(opentelemetry({
+    serviceName: 'my-service',
+    endpoint: 'http://localhost:4318'
+  }))
 ```
 
 ### Custom Logging
-
 ```typescript
 .onRequest(({ request }) => {
   console.log(`[${new Date().toISOString()}] ${request.method} ${request.url}`)
@@ -309,18 +299,18 @@ new Elysia().use(
 ## SSL/TLS (HTTPS)
 
 ```typescript
-import { Elysia, file } from "elysia";
+import { Elysia, file } from 'elysia'
 
 new Elysia({
   serve: {
     tls: {
-      cert: file("cert.pem"),
-      key: file("key.pem"),
-    },
-  },
+      cert: file('cert.pem'),
+      key: file('key.pem')
+    }
+  }
 })
-  .get("/", () => "Hello HTTPS")
-  .listen(3000);
+  .get('/', () => 'Hello HTTPS')
+  .listen(3000)
 ```
 
 ## Best Practices
@@ -355,46 +345,42 @@ new Elysia({
 
 ```typescript
 // src/server.ts
-import { cors } from "@elysiajs/cors";
-import { opentelemetry } from "@elysiajs/opentelemetry";
-import { Elysia } from "elysia";
+import { Elysia } from 'elysia'
+import { cors } from '@elysiajs/cors'
+import { opentelemetry } from '@elysiajs/opentelemetry'
 
 export const app = new Elysia({
   aot: true,
-  nativeStaticResponse: true,
+  nativeStaticResponse: true
 })
-  .use(
-    cors({
-      origin: process.env.CORS_ORIGIN || "http://localhost:3000",
-    }),
-  )
-  .use(
-    opentelemetry({
-      serviceName: "my-service",
-    }),
-  )
-  .get("/health", () => ({ status: "ok" }))
-  .get("/", () => "Hello Production")
-  .listen(parseInt(process.env.PORT || "3000"));
+  .use(cors({
+    origin: process.env.CORS_ORIGIN || 'http://localhost:3000'
+  }))
+  .use(opentelemetry({
+    serviceName: 'my-service'
+  }))
+  .get('/health', () => ({ status: 'ok' }))
+  .get('/', () => 'Hello Production')
+  .listen(parseInt(process.env.PORT || '3000'))
 
 // Graceful shutdown
-process.on("SIGTERM", () => {
-  app.stop();
-  process.exit(0);
-});
+process.on('SIGTERM', () => {
+  app.stop()
+  process.exit(0)
+})
 ```
 
 ```typescript
 // src/index.ts (cluster)
-import cluster from "node:cluster";
-import os from "node:os";
+import cluster from 'node:cluster'
+import os from 'node:os'
 
 if (cluster.isPrimary) {
   for (let i = 0; i < os.availableParallelism(); i++) {
-    cluster.fork();
+    cluster.fork()
   }
 } else {
-  await import("./server");
+  await import('./server')
 }
 ```
 

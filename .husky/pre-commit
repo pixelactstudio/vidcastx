@@ -14,7 +14,7 @@ if [ -n "$staged" ]; then
   while IFS= read -r f; do
     case "$f" in
       packages/database/src/schema/*) schema_changed=1 ;;
-      packages/database/src/migrations/*|packages/database/migrations/*) migration_added=1 ;;
+      packages/database/drizzle/*) migration_added=1 ;;
     esac
   done <<< "$staged"
 

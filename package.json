@@ -23,6 +23,8 @@
     "db:generate": "turbo db:generate",
     "db:push": "turbo db:push",
     "db:studio": "turbo db:studio",
+    "worktree:new": "bash scripts/worktree.sh new",
+    "worktree:setup": "bash scripts/worktree.sh setup",
     "postinstall": "pnpm lint:ws",
     "prepare": "husky"
   },
