@@ -21,7 +21,7 @@ VidcastX is open-source (MIT), self-hostable video infrastructure in the style o
 | Area                            | State                                                                                                                  |
 | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | Auth and organizations          | Implemented: email/password, GitHub and Discord sign-in, organizations with members and roles.                         |
-| Video library                   | Implemented: drafts, folders, metadata editing, pinning, soft delete and restore.                                      |
+| Video library                   | Implemented: drafts, folders, metadata editing, pinning. Delete and restore are stubs until V1.                        |
 | Upload                          | Works: resumable S3 multipart uploads straight from the browser using presigned part URLs.                             |
 | Transcode                       | Works: HLS ladder (1080p/720p/480p, never above the source except the 480p floor), poster JPEG and WebM hover preview. |
 | Playback player                 | In progress for V1. The API already returns a signed URL for the master playlist.                                      |
@@ -29,7 +29,7 @@ VidcastX is open-source (MIT), self-hostable video infrastructure in the style o
 | Webhooks                        | In progress for V1.                                                                                                    |
 | AI, live streaming, and billing | Database tables exist. No user-facing implementation.                                                                  |
 
-The longer-term product direction lives in `IDEA.md` at the repository root. It describes where the project wants to go, not what the code does today. The prioritized work queue is in `TODO.md`.
+`IDEA.md` at the repository root defines the product and what V1 contains. The phased plan and progress live in `tasks/todo.md`.
 
 ## Where to go next
 
