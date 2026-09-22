@@ -7,13 +7,10 @@ export const Route = createFileRoute("/_protected")({
     const session = await getSession();
 
     if (!session) {
-      // eslint-disable-next-line @typescript-eslint/only-throw-error -- TanStack Router's redirect() throws a special redirect object
       throw redirect({ to: "/auth/login", search: { redirect: location.href } });
     }
 
-    // If user has no organization, redirect to onboarding
     if (!session.user.hasOrganization && !location.pathname.startsWith("/onboarding")) {
-      // eslint-disable-next-line @typescript-eslint/only-throw-error -- TanStack Router's redirect() throws a special redirect object
       throw redirect({ to: "/onboarding" });
     }
 

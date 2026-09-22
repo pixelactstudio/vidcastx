@@ -87,4 +87,28 @@ export const config = [
       "@typescript-eslint/array-type": "off",
     },
   },
+
+  /* ─── TanStack throw-to-navigate pattern ──────────── */
+  {
+    // TanStack Router's `redirect()` and `notFound()` return non-Error objects
+    // (Redirect extends Response; NotFoundError is a plain object) that the
+    // router catches inside loaders/beforeLoad/server functions to short-circuit
+    // navigation. This is the prescribed API — allow-list the types so the
+    // rule doesn't force bogus Error wrappers around framework sentinels.
+    rules: {
+      "@typescript-eslint/only-throw-error": [
+        "error",
+        {
+          allow: [
+            {
+              from: "package",
+              name: ["Redirect", "AnyRedirect", "ResolvedRedirect"],
+              package: "@tanstack/router-core",
+            },
+            { from: "package", name: "NotFoundError", package: "@tanstack/router-core" },
+          ],
+        },
+      ],
+    },
+  },
 ];
