@@ -62,7 +62,7 @@ overrides:
   fast-xml-parser@<5.7.0: ^5.7.0
   fast-xml-parser@>=5.0.0 <5.5.6: ^5.5.6
   fast-xml-parser@>=5.0.0 <5.5.7: ^5.5.7
-  file-type@>=13.0.0 <21.3.1: ^21.3.1
+  file-type@>=13.0.0 <21.3.1: ^21.3.4
   file-type@>=20.0.0 <=21.3.1: ^21.3.2
   ioredis: 5.10.0
   ip-address@<=10.1.0: ^10.1.1
