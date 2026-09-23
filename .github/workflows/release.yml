@@ -3,9 +3,10 @@
 # open with the next version and CHANGELOG. Merging that PR tags the
 # release and publishes GitHub release notes.
 #
-# PRs opened with GITHUB_TOKEN don't trigger other workflows, so the
-# release PR won't run CI on its own; it only touches CHANGELOG.md and
-# version fields, which CI already validated on main.
+# The release PR is opened with GITHUB_TOKEN, and the repo's approval
+# policy treats github-actions[bot] as a first-time contributor, so its
+# CI runs wait in "action_required". To release: open the PR, click
+# "Approve workflows to run", wait for CI, approve the PR and merge.
 name: Release
 
 on:
@@ -26,7 +27,7 @@ jobs:
     name: Release please
     runs-on: ubuntu-latest
     steps:
-      - uses: googleapis/release-please-action@v4
+      - uses: googleapis/release-please-action@v5
         with:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
