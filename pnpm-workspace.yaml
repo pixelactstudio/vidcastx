@@ -60,7 +60,7 @@ overrides:
   esbuild@<=0.24.2: 0.25.0
   esbuild@>=0.27.3 <0.28.1: ^0.28.1
   fast-xml-parser@<5.7.0: ^5.7.0
-  fast-xml-parser@>=5.0.0 <5.5.6: ^5.5.6
+  fast-xml-parser@>=5.0.0 <5.5.6: ^5.11.1
   fast-xml-parser@>=5.0.0 <5.5.7: ^5.5.7
   file-type@>=13.0.0 <21.3.1: ^21.3.1
   file-type@>=20.0.0 <=21.3.1: ^21.3.2
