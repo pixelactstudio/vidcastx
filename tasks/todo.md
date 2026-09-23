@@ -21,7 +21,7 @@ Each phase is a feature branch (`pnpm worktree:new feat/<name>`) merged into `de
 
 **Follow-ups:**
 
-- [x] Allow GitHub Actions to create pull requests; release-please opened #90, and the Release workflow now dispatches CI on it so the required check can pass
+- [x] Allow GitHub Actions to create pull requests; release-please opened #90 (its CI runs need a one-click approval, see `release.yml`)
 - [x] Dependabot config removed; Renovate batches minor/patch into one weekly PR, majors wait for a dashboard tick
 - [ ] Install the Renovate app on the `pixelactstudio` org (it stayed on the personal account when the repo moved, so Renovate hasn't run since July)
 - [ ] Remove the Blacksmith app's access to this repo (it appends a Codesmith footer to every PR body; CI doesn't use Blacksmith runners)
