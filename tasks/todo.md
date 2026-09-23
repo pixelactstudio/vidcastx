@@ -21,7 +21,10 @@ Each phase is a feature branch (`pnpm worktree:new feat/<name>`) merged into `de
 
 **Follow-ups:**
 
-- [ ] Allow GitHub Actions to create pull requests (org Settings → Actions → General, then the repo's), then re-run the Release workflow so release-please opens its PR
+- [x] Allow GitHub Actions to create pull requests; release-please opened #90 (its CI runs need a one-click approval, see `release.yml`)
+- [x] Dependabot config removed; Renovate batches minor/patch into one weekly PR, majors wait for a dashboard tick
+- [ ] Install the Renovate app on the `pixelactstudio` org (it stayed on the personal account when the repo moved, so Renovate hasn't run since July)
+- [ ] Remove the Blacksmith app's access to this repo (it appends a Codesmith footer to every PR body; CI doesn't use Blacksmith runners)
 - [ ] Upgrade better-auth to 1.7 (held on `~1.6` plus a `@better-auth/core` override in `pnpm-workspace.yaml`; 1.7 changes the secondary-storage and plugin option types in `packages/auth`)
 - [ ] vitest 4 major (clears the last two audit advisories)
 

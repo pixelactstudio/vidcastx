@@ -1,77 +1,52 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended",
-    ":maintainLockFilesWeekly",
-    ":semanticCommits",
-    ":gitSignOff",
-    ":dependencyDashboard"
-  ],
-  "baseBranches": ["dev"],
-  "updateInternalDeps": true,
-  "rangeStrategy": "bump",
+  "extends": ["config:recommended", ":semanticCommits", ":maintainLockFilesWeekly", "group:allNonMajor"],
+  "baseBranchPatterns": ["dev"],
   "timezone": "UTC",
   "schedule": ["before 9am on monday"],
-  "labels": ["dependencies", "renovate"],
+  "labels": ["dependencies"],
+  "rangeStrategy": "bump",
   "minimumReleaseAge": "3 days",
   "internalChecksFilter": "strict",
   "prCreation": "not-pending",
-  "prConcurrentLimit": 10,
-  "prHourlyLimit": 4,
-  "rebaseWhen": "auto",
-  "platformAutomerge": true,
   "dependencyDashboardTitle": "📦 Dependency Dashboard",
   "vulnerabilityAlerts": {
-    "enabled": true,
-    "schedule": ["at any time"],
     "labels": ["dependencies", "security"]
   },
   "osvVulnerabilityAlerts": true,
+  "lockFileMaintenance": {
+    "automerge": true
+  },
   "packageRules": [
     {
-      "description": "Auto-merge safe non-breaking updates",
-      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
-      "automerge": true,
-      "automergeType": "pr"
+      "description": "One weekly PR for every minor and patch update, merged once CI passes",
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true
     },
     {
-      "description": "Manual review for majors",
+      "description": "Majors wait for a tick on the dependency dashboard",
       "matchUpdateTypes": ["major"],
-      "automerge": false,
+      "dependencyDashboardApproval": true,
       "labels": ["dependencies", "major-update"]
     },
     {
-      "description": "Group the linting stack",
-      "matchPackageNames": ["eslint", "prettier", "/^eslint-plugin-/", "/^eslint-config-/", "/^@typescript-eslint\\//"],
-      "groupName": "linting stack"
+      "description": "GitHub Actions in one PR, majors included: CI exercises every action on the PR itself",
+      "matchManagers": ["github-actions"],
+      "groupName": "github actions",
+      "groupSlug": "github-actions",
+      "dependencyDashboardApproval": false
     },
     {
-      "description": "Group React core",
-      "matchPackageNames": ["react", "react-dom", "@types/react", "@types/react-dom"],
-      "groupName": "react monorepo"
+      "description": "better-auth is held on ~1.6 (see tasks/todo.md); keep its bump out of the weekly batch so it can't block it",
+      "matchPackageNames": ["better-auth", "/^@better-auth\\//"],
+      "groupName": "better-auth",
+      "groupSlug": "better-auth",
+      "automerge": false
     },
     {
-      "description": "Group TanStack",
-      "matchPackageNames": ["/^@tanstack\\//"],
-      "groupName": "tanstack"
-    },
-    {
-      "description": "Group Drizzle",
-      "matchPackageNames": ["drizzle-orm", "drizzle-kit", "drizzle-typebox", "drizzle-zod"],
-      "groupName": "drizzle"
-    },
-    {
-      "description": "Group Elysia",
-      "matchPackageNames": ["elysia", "/^@elysiajs\\//"],
-      "groupName": "elysia"
-    },
-    {
-      "description": "Ignore internal workspace packages",
+      "description": "Workspace packages are versioned in-repo",
       "matchPackageNames": ["/^@vidcastx\\//"],
       "enabled": false
     }
-  ],
-  "npm": {
-    "fileMatch": ["(^|/)package\\.json$", "(^|/)package\\.json\\.hbs$"]
-  }
+  ]
 }
