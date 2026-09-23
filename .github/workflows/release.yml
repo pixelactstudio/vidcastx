@@ -3,9 +3,10 @@
 # open with the next version and CHANGELOG. Merging that PR tags the
 # release and publishes GitHub release notes.
 #
-# PRs opened with GITHUB_TOKEN don't trigger other workflows, so the
-# release PR won't run CI on its own; it only touches CHANGELOG.md and
-# version fields, which CI already validated on main.
+# PRs opened or updated with GITHUB_TOKEN don't trigger other workflows,
+# so the release PR would never get the "CI" check that main requires.
+# workflow_dispatch is the exception, so dispatch CI on the release
+# branch whenever release-please opens or updates its PR.
 name: Release
 
 on:
@@ -18,6 +19,7 @@ concurrency:
   cancel-in-progress: false
 
 permissions:
+  actions: write
   contents: write
   pull-requests: write
 
@@ -26,7 +28,15 @@ jobs:
     name: Release please
     runs-on: ubuntu-latest
     steps:
-      - uses: googleapis/release-please-action@v4
+      - uses: googleapis/release-please-action@v5
+        id: release
         with:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+
+      - name: Run CI on the release PR
+        if: steps.release.outputs.prs_created == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ fromJSON(steps.release.outputs.pr).headBranchName }}
+        run: gh workflow run ci.yml --repo "$GITHUB_REPOSITORY" --ref "$BRANCH"
