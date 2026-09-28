@@ -43,7 +43,7 @@
   },
   "packageManager": "pnpm@11.15.0",
   "engines": {
-    "node": ">=22.13"
+    "node": ">=24.21.0"
   },
   "prettier": "@vidcastx/prettier",
   "workspaces": [
