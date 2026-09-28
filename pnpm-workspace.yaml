@@ -51,24 +51,24 @@ minimumReleaseAgeExclude:
 overrides:
   # Keep better-auth's core on the same minor as better-auth (~1.6 in package.json).
   "@better-auth/core": ~1.6.33
-  "@babel/core@<=7.29.0": ^7.29.1
-  "@opentelemetry/core@<2.8.0": ^2.8.0
-  "@opentelemetry/exporter-prometheus@<0.217.0": ^0.217.0
-  "@opentelemetry/propagator-jaeger@<2.9.0": ^2.9.0
-  "@opentelemetry/sdk-node@<0.217.0": ^0.217.0
+  "@babel/core@<=7.29.0": ^7.29.7
+  "@opentelemetry/core@<2.8.0": ^2.11.0
+  "@opentelemetry/exporter-prometheus@<0.217.0": ^0.222.0
+  "@opentelemetry/propagator-jaeger@<2.9.0": ^2.11.0
+  "@opentelemetry/sdk-node@<0.217.0": ^0.222.0
   "@types/minimatch": 5.1.2
-  esbuild@<=0.24.2: 0.25.0
-  esbuild@>=0.27.3 <0.28.1: ^0.28.1
-  fast-xml-parser@<5.7.0: ^5.7.0
+  esbuild@<=0.24.2: 0.28.2
+  esbuild@>=0.27.3 <0.28.1: ^0.28.2
+  fast-xml-parser@<5.7.0: ^5.11.1
   fast-xml-parser@>=5.0.0 <5.5.6: ^5.11.1
   fast-xml-parser@>=5.0.0 <5.5.7: ^5.11.1
   file-type@>=13.0.0 <21.3.1: ^21.3.4
-  file-type@>=20.0.0 <=21.3.1: ^21.3.2
-  ioredis: 5.10.0
+  file-type@>=20.0.0 <=21.3.1: ^21.3.4
+  ioredis: 5.11.1
   ip-address@<=10.1.0: ^10.7.2
   js-yaml@>=4.0.0 <=4.1.1: ^4.3.2
   postcss@<8.5.10: ^8.5.28
-  protobufjs@<8.7.1: 8.7.1
+  protobufjs@<8.7.1: 8.8.0
   undici@>=7.0.0 <7.28.0: ^7.29.1
   undici@>=7.23.0 <7.28.0: ^7.29.1
   uuid@<11.1.1: ^11.1.1

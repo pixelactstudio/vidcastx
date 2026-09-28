@@ -14,12 +14,12 @@
     "with-env": "dotenv -e ../../.env --"
   },
   "devDependencies": {
-    "@types/node": "^25.3.3",
+    "@types/node": "^25.9.8",
     "@vidcastx/eslint-config": "workspace:*",
     "@vidcastx/prettier": "workspace:*",
     "@vidcastx/typescript-config": "workspace:*",
-    "eslint": "^9.39.4",
-    "typescript": "^6.0.2"
+    "eslint": "^9.39.5",
+    "typescript": "^6.0.3"
   },
   "prettier": "@vidcastx/prettier"
 }

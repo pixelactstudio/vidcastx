@@ -10,8 +10,8 @@
     "with-env": "dotenv -e ../../.env --"
   },
   "devDependencies": {
-    "@types/node": "^25.3.3",
+    "@types/node": "^25.9.8",
     "dotenv-cli": "^11.0.0",
-    "drizzle-kit": "^0.31.9"
+    "drizzle-kit": "^0.31.11"
   }
 }
