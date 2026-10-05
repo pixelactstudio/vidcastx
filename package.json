@@ -30,20 +30,20 @@
     "prepare": "husky"
   },
   "devDependencies": {
-    "@turbo/gen": "^2.10.5",
+    "@turbo/gen": "^2.11.6",
     "@vidcastx/eslint-config": "workspace:*",
     "@vidcastx/prettier": "workspace:*",
     "@vidcastx/typescript-config": "workspace:*",
-    "eslint": "^9.39.4",
+    "eslint": "^9.39.5",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
-    "prettier": "^3.8.1",
-    "turbo": "^2.10.5",
-    "typescript": "^6.0.2"
+    "prettier": "^3.9.9",
+    "turbo": "^2.11.6",
+    "typescript": "^6.0.3"
   },
-  "packageManager": "pnpm@11.15.0",
+  "packageManager": "pnpm@11.28.3",
   "engines": {
-    "node": ">=22.13"
+    "node": ">=22.23.3"
   },
   "prettier": "@vidcastx/prettier",
   "workspaces": [

@@ -19,21 +19,21 @@
   },
   "prettier": "@vidcastx/prettier",
   "devDependencies": {
-    "@types/node": "^25.3.3",
-    "@types/pg": "^8.18.0",
+    "@types/node": "^25.9.9",
+    "@types/pg": "^8.23.1",
     "@vidcastx/eslint-config": "workspace:*",
     "@vidcastx/prettier": "workspace:*",
     "@vidcastx/typescript-config": "workspace:*",
     "dotenv-cli": "^11.0.0",
-    "drizzle-kit": "^0.31.9",
-    "eslint": "^9.39.4"
+    "drizzle-kit": "^0.31.11",
+    "eslint": "^9.39.5"
   },
   "dependencies": {
-    "@t3-oss/env-core": "^0.13.10",
-    "drizzle-orm": "^0.45.2",
+    "@t3-oss/env-core": "^0.13.11",
+    "drizzle-orm": "^0.45.3",
     "drizzle-zod": "^0.8.3",
-    "nanoid": "^5.1.6",
-    "pg": "^8.19.0",
-    "zod": "^4.3.6"
+    "nanoid": "^5.1.16",
+    "pg": "^8.23.1",
+    "zod": "^4.6.5"
   }
 }
