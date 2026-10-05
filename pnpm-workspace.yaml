@@ -50,7 +50,7 @@ minimumReleaseAgeExclude:
 
 overrides:
   # Keep better-auth's core on the same minor as better-auth (~1.6 in package.json).
-  "@better-auth/core": ~1.6.33
+  "@better-auth/core": ~1.7.7
   "@babel/core@<=7.29.0": ^7.29.1
   "@opentelemetry/core@<2.8.0": ^2.8.0
   "@opentelemetry/exporter-prometheus@<0.217.0": ^0.217.0
