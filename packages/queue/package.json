@@ -16,15 +16,15 @@
   },
   "prettier": "@vidcastx/prettier",
   "devDependencies": {
-    "@types/node": "^25.3.3",
+    "@types/node": "^25.9.9",
     "@vidcastx/eslint-config": "workspace:*",
     "@vidcastx/prettier": "workspace:*",
     "@vidcastx/typescript-config": "workspace:*",
     "dotenv-cli": "^11.0.0",
-    "eslint": "^9.39.4"
+    "eslint": "^9.39.5"
   },
   "dependencies": {
     "@vidcastx/redis": "workspace:^",
-    "bullmq": "^5.70.1"
+    "bullmq": "^5.81.5"
   }
 }
